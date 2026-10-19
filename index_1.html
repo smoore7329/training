@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AIME Training</title>
+<meta name="theme-color" content="#1F3864">
+<style>
+  :root{
+    --navy:#1F3864; --navy-2:#2B4A80; --ink:#1b2230; --muted:#5d6676; --line:#dde2ea; --bg:#f3f5f8; --card:#fff;
+    --green:#1e7b45; --green-bg:#e3f4ea; --red:#b42318; --red-bg:#fde8e6; --amber:#9a5b00; --amber-bg:#fff2d6; --blue-bg:#e7eefb;
+    --r:12px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;-webkit-text-size-adjust:100%}
+  button,input,textarea{font:inherit}
+  header{background:var(--navy);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:5}
+  header .brand{font-weight:800;letter-spacing:.3px}
+  header .brand small{font-weight:500;opacity:.75;margin-left:6px}
+  header .sp{flex:1}
+  header .who{font-size:14px;opacity:.9;text-align:right}
+  header button{background:transparent;border:1px solid rgba(255,255,255,.45);color:#fff;border-radius:8px;padding:8px 12px;cursor:pointer}
+  nav.tabs{display:flex;gap:6px;padding:10px 16px 0;max-width:980px;margin:0 auto}
+  nav.tabs button{border:0;background:transparent;padding:10px 14px;border-bottom:3px solid transparent;color:var(--muted);font-weight:600;cursor:pointer}
+  nav.tabs button.on{color:var(--navy);border-color:var(--navy)}
+  main{max-width:980px;margin:0 auto;padding:16px 16px 60px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;margin-bottom:14px}
+  h1{font-size:24px;margin:4px 0 12px} h2{font-size:19px;margin:0 0 10px} h3{font-size:16px;margin:18px 0 6px}
+  .muted{color:var(--muted)} .small{font-size:14px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:10px 18px;border-radius:10px;border:1px solid var(--navy);background:var(--navy);color:#fff;font-weight:600;cursor:pointer;text-decoration:none}
+  .btn.ghost{background:#fff;color:var(--navy)}
+  .btn.green{background:var(--green);border-color:var(--green)}
+  .btn.sm{min-height:38px;padding:6px 12px;font-size:14px}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:13px;font-weight:600;white-space:nowrap}
+  .pill.g{background:var(--green-bg);color:var(--green)} .pill.r{background:var(--red-bg);color:var(--red)}
+  .pill.a{background:var(--amber-bg);color:var(--amber)} .pill.b{background:var(--blue-bg);color:var(--navy)} .pill.n{background:#eef0f3;color:var(--muted)}
+  .bar{height:10px;background:#e8ebf0;border-radius:99px;overflow:hidden} .bar>i{display:block;height:100%;background:var(--green)}
+  .list{border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .item{display:flex;gap:12px;align-items:center;padding:14px;border-top:1px solid var(--line);background:#fff}
+  .item:first-child{border-top:0}
+  .item .num{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#eef1f6;font-weight:700;color:var(--navy);flex:none}
+  .item .num.done{background:var(--green);color:#fff}
+  .item .txt{flex:1;min-width:0}
+  .item .txt b{display:block}
+  label{display:block;font-weight:600;margin:12px 0 6px}
+  input[type=text],input[type=password],input[type=search],textarea{width:100%;padding:14px;border:1px solid #c5ccd8;border-radius:10px;background:#fff;font-size:18px}
+  textarea{font-size:16px;min-height:90px}
+  .err{background:var(--red-bg);color:var(--red);padding:12px 14px;border-radius:10px;margin:12px 0;font-weight:600}
+  .center{min-height:70vh;display:grid;place-items:center}
+  .login{width:100%;max-width:420px}
+  .lesson h2{font-size:18px;margin:20px 0 8px;color:var(--navy)} .lesson ul,.lesson ol{padding-left:22px} .lesson li{margin:6px 0}
+  .q{font-size:20px;font-weight:600;margin:6px 0 16px}
+  .choice{display:block;width:100%;text-align:left;padding:16px;margin:10px 0;border:2px solid var(--line);border-radius:12px;background:#fff;cursor:pointer;font-size:17px}
+  .choice.on{border-color:var(--navy);background:var(--blue-bg)}
+  .crit{color:var(--red);font-weight:700;font-size:14px}
+  .result{border-left:4px solid var(--line);padding:10px 12px;margin:10px 0;background:#fff;border-radius:6px}
+  .result.ok{border-color:var(--green)} .result.no{border-color:var(--red)}
+  .banner{padding:22px;border-radius:var(--r);text-align:center;margin-bottom:14px}
+  .banner.pass{background:var(--green-bg);color:var(--green)} .banner.fail{background:var(--red-bg);color:var(--red)}
+  .banner .big{font-size:40px;font-weight:800}
+  .modal{position:fixed;inset:0;background:rgba(10,20,40,.45);display:grid;place-items:center;padding:16px;z-index:20}
+  .modal .card{max-width:560px;width:100%;margin:0}
+  table{width:100%;border-collapse:collapse;font-size:14px} th,td{text-align:left;padding:8px;border-bottom:1px solid var(--line);vertical-align:top} th{background:#f0f3f8}
+  .spinner{width:28px;height:28px;border:3px solid #c9d2e3;border-top-color:var(--navy);border-radius:50%;animation:spin 1s linear infinite;margin:40px auto}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .lesson h3,.doc h3{font-size:16px;margin:16px 0 6px}
+  .doc h2{font-size:18px;margin:24px 0 8px;color:var(--navy);padding-top:8px;border-top:1px solid var(--line)}
+  .doc h2:first-child{border-top:0;padding-top:0;margin-top:4px}
+  .doc ul,.doc ol{padding-left:22px} .doc li{margin:5px 0}
+  .tbl{overflow-x:auto;margin:10px 0} .tbl table{min-width:480px}
+  .callout{border-left:4px solid var(--navy);background:var(--blue-bg);padding:10px 14px;border-radius:6px;margin:12px 0}
+  .callout.warn{border-color:var(--red);background:var(--red-bg)}
+  .ackbar{position:sticky;bottom:0;background:#fff;border-top:2px solid var(--line);padding:14px 18px;margin:0 -16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;z-index:4}
+  .snippet{font-size:14px;color:var(--muted);margin-top:4px}
+  .cat{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:18px 0 8px}
+  .print-only{display:none}
+  @media print{
+    header,nav.tabs,.no-print{display:none!important} body{background:#fff} main{padding:0;max-width:none} .card{border:0;padding:0} .print-only{display:block}
+  }
+  @media (max-width:600px){ .item{flex-wrap:wrap} h1{font-size:21px} }
+</style>
+</head>
+<body>
+<header class="no-print">
+  <div class="brand">AIME<small>Training</small></div>
+  <div class="sp"></div>
+  <div class="who" id="who"></div>
+  <button id="signout" hidden>Sign out</button>
+</header>
+<nav class="tabs no-print" id="tabs" hidden></nav>
+<main id="app"><div class="spinner"></div></main>
+
+<script>
+// ===== Settings =====
+const API_URL = "https://vbfspyruvaoqmhuutphl.supabase.co/functions/v1/training"; // Supabase function address
+const IDLE_MINUTES = 10; // sign out automatically after this long with no taps (shared tablets)
+
+// ===== State =====
+let S = { token: null, me: null, view: "home", data: null, quiz: null, viewing: null };
+const store = { get(k){ try{ return JSON.parse(sessionStorage.getItem(k)); }catch{ return null; } }, set(k,v){ try{ sessionStorage.setItem(k, JSON.stringify(v)); }catch{} }, del(k){ try{ sessionStorage.removeItem(k); }catch{} } };
+const $ = (s) => document.querySelector(s);
+const app = $("#app");
+const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const pct = (x) => Math.round((x ?? 0) * 100) + "%";
+const fmtDate = (d) => d ? new Date(d.length === 10 ? d + "T12:00:00" : d).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }) : "";
+const fmtDT = (d) => d ? new Date(d).toLocaleString(undefined, { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" }) : "";
+const isLead = () => ["QC Lead", "Admin"].includes(S.me?.role);
+
+async function api(action, payload = {}) {
+  const r = await fetch(API_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action, token: S.token, ...payload }) });
+  const j = await r.json().catch(() => ({ error: "The server didn't respond properly. Check the connection and try again." }));
+  if (r.status === 401 && action !== "login") { signOut(j.error); throw new Error(j.error); }
+  if (!r.ok) throw new Error(j.error || "Something went wrong");
+  return j;
+}
+function loading(){ app.innerHTML = '<div class="spinner"></div>'; }
+function showErr(e, where = app){ const d = document.createElement("div"); d.className = "err"; d.textContent = e.message || String(e); where.prepend(d); window.scrollTo(0,0); }
+
+// Tiny markdown for lessons: ## headings, - / 1. lists, **bold**, _italic_
+function md(src) {
+  const inline = (t) => esc(t).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/(^|[\s(])[_*](.+?)[_*](?=[\s.,;:)!?]|$)/g, "$1<i>$2</i>");
+  let html = "", list = null;
+  const close = () => { if (list) { html += `</${list}>`; list = null; } };
+  const lines = String(src || "").split("\n");
+  const cellsOf = (l) => l.trim().replace(/^\||\|$/g, "").split("|").map((c) => c.trim());
+  for (let i = 0; i < lines.length; i++) {
+    const l = lines[i].trimEnd();
+    let m;
+    if (!l.trim()) { close(); continue; }
+    if (l.trim().startsWith("|")) {
+      close(); const rows = [];
+      while (i < lines.length && lines[i].trim().startsWith("|")) { if (!/^\|[\s\-:|]+\|$/.test(lines[i].trim())) rows.push(cellsOf(lines[i])); i++; }
+      i--;
+      html += `<div class="tbl"><table><tr>${rows[0].map((c) => `<th>${inline(c)}</th>`).join("")}</tr>${rows.slice(1).map((r) => `<tr>${r.map((c) => `<td>${inline(c)}</td>`).join("")}</tr>`).join("")}</table></div>`;
+      continue;
+    }
+    if ((m = l.match(/^>\s?(.*)/))) { close(); html += `<div class="callout ${/FAIL|IMPORTANT|WARNING|DANGER/.test(m[1]) ? "warn" : ""}">${inline(m[1])}</div>`; continue; }
+    if ((m = l.match(/^###\s+(.*)/))) { close(); html += `<h3>${inline(m[1])}</h3>`; }
+    else if ((m = l.match(/^#{1,2}\s+(.*)/))) { close(); html += `<h2>${inline(m[1])}</h2>`; }
+    else if ((m = l.match(/^\s*[-*]\s+(.*)/))) { if (list !== "ul") { close(); html += "<ul>"; list = "ul"; } html += `<li>${inline(m[1])}</li>`; }
+    else if ((m = l.match(/^\s*\d+[.)]\s+(.*)/))) { if (list !== "ol") { close(); html += "<ol>"; list = "ol"; } html += `<li>${inline(m[1])}</li>`; }
+    else { close(); html += `<p>${inline(l)}</p>`; }
+  }
+  close(); return html;
+}
+
+// ===== Session / idle =====
+let idleTimer;
+function bumpIdle(){ clearTimeout(idleTimer); if (S.token) idleTimer = setTimeout(() => signOut("Signed out after " + IDLE_MINUTES + " minutes without activity."), IDLE_MINUTES * 60000); }
+["pointerdown","keydown"].forEach((ev) => addEventListener(ev, bumpIdle, { passive: true }));
+function signOut(msg){ S = { token: null, me: null, view: "home" }; store.del("session"); window.onbeforeunload = null; renderHeader(); renderLogin(msg); }
+$("#signout").onclick = () => { if (S.quiz && !confirm("Leave this quiz? Your answers will not be saved.")) return; signOut(); };
+
+function renderHeader(){
+  $("#who").innerHTML = S.me ? `<b>${esc(S.me.name)}</b><br><span style="opacity:.8">${esc(S.me.role)}${S.me.site ? " · " + esc(S.me.site) : ""}</span>` : "";
+  $("#signout").hidden = !S.me;
+  const tabs = $("#tabs");
+  tabs.hidden = !S.me;
+  if (!tabs.hidden) {
+    const on = (v) => (v.includes(S.view) ? "on" : "");
+    tabs.innerHTML = `<button data-v="home" class="${on(["home", "lesson", "transcript"])}">My training</button><button data-v="library" class="${on(["library", "doc"])}">Library</button>` +
+      (isLead() ? `<button data-v="trainees" class="${on(["trainees", "trainee"])}">Trainees</button>` : "");
+    tabs.querySelectorAll("button").forEach((b) => b.onclick = () => { if (S.quiz && !confirm("Leave this quiz?")) return; S.quiz = null; window.onbeforeunload = null; go(b.dataset.v); });
+  }
+}
+
+// ===== Login =====
+function renderLogin(msg){
+  app.innerHTML = `
+  <div class="center"><div class="card login">
+    <h1>Sign in</h1>
+    <p class="muted">Use your Employee ID and training PIN. Ask a QC Lead if you don't have a PIN yet.</p>
+    ${msg ? `<div class="err">${esc(msg)}</div>` : ""}
+    <form id="lf" autocomplete="off">
+      <label for="eid">Employee ID</label><input id="eid" type="text" inputmode="numeric" autocomplete="off" required>
+      <label for="pin">PIN</label><input id="pin" type="password" inputmode="numeric" maxlength="6" autocomplete="off" required>
+      <div style="margin-top:18px"><button class="btn" style="width:100%" id="lb">Sign in</button></div>
+    </form>
+  </div></div>`;
+  $("#eid").focus();
+  $("#lf").onsubmit = async (e) => {
+    e.preventDefault(); $("#lb").disabled = true;
+    try {
+      const r = await api("login", { employeeId: $("#eid").value, pin: $("#pin").value });
+      S.token = r.token; S.me = r.me; store.set("session", { token: r.token, me: r.me }); bumpIdle(); go("home");
+    } catch (err) { renderLogin(err.message); }
+  };
+}
+
+// ===== Navigation =====
+async function go(view, arg){
+  S.view = view; renderHeader(); window.scrollTo(0,0);
+  if (view === "home") return home();
+  if (view === "trainees") return trainees();
+  if (view === "trainee") return trainee(arg);
+  if (view === "lesson") return lesson(arg);
+  if (view === "transcript") return transcript(arg);
+  if (view === "library") return library(arg);
+  if (view === "doc") return docView(arg);
+}
+
+function statusPill(s){ return s === "Qualified" ? '<span class="pill g">Qualified</span>' : s === "In Training" ? '<span class="pill a">In training</span>' : s === "Expired" ? '<span class="pill r">Expired</span>' : '<span class="pill n">Not started</span>'; }
+
+function courseHTML(c, opts){
+  const total = c.modules.length + c.practical.length;
+  const done = c.modules.filter((m) => m.passed).length + c.practical.filter((p) => p.signed).length;
+  const mods = c.modules.map((m, i) => {
+    let st, action = "";
+    if (m.passed) st = `<span class="pill g">Passed ${pct(m.passedScore)}</span> <span class="small muted">${fmtDate(m.passedDate)}</span>`;
+    else if (m.locked) st = `<span class="pill r">Locked: ${m.failsSinceReview} failed attempts</span>`;
+    else if (m.attempts) st = `<span class="pill a">Not passed yet</span> <span class="small muted">best ${pct(m.best)}, ${m.maxAttempts - m.failsSinceReview} tr${m.maxAttempts - m.failsSinceReview === 1 ? "y" : "ies"} left</span>`;
+    else st = `<span class="pill n">Not started</span>`;
+    if (opts.self && !m.locked) action = `<button class="btn sm ${m.passed ? "ghost" : ""}" data-lesson="${m.id}">${m.passed ? "Review" : m.attempts ? "Try again" : "Start"}</button>`;
+    if (opts.lead && m.locked) action = `<button class="btn sm" data-unlock="${m.id}">Unlock</button>`;
+    return `<div class="item"><div class="num ${m.passed ? "done" : ""}">${m.passed ? "✓" : i + 1}</div><div class="txt"><b>${esc(m.name)}</b><div>${st}</div></div>${action}</div>`;
+  }).join("");
+  const pr = c.practical.map((p) => {
+    const st = p.signed ? `<span class="pill g">Signed off</span> <span class="small muted">${esc(p.signedBy)} · ${fmtDate(p.signedAt)}</span>` : `<span class="pill n">Waiting for a QC Lead</span>`;
+    const action = opts.lead && !p.signed ? `<button class="btn sm" data-sign="${p.id}">Sign off</button>` : "";
+    return `<div class="item"><div class="num ${p.signed ? "done" : ""}">${p.signed ? "✓" : esc(p.code)}</div><div class="txt"><b>${esc(p.task)}</b><div class="small muted">${esc(p.confirms)}</div><div>${st}</div></div>${action}</div>`;
+  }).join("");
+  return `<div class="card">
+    <div class="row" style="justify-content:space-between"><h2 style="margin:0">${esc(c.name)}</h2>${statusPill(c.status)}</div>
+    ${c.status === "Qualified" ? `<p class="small" style="color:var(--green);font-weight:600">Qualified ${fmtDate(c.qualifiedDate)}${c.expires ? " · expires " + fmtDate(c.expires) : ""}</p>` : ""}
+    <div class="row small muted" style="margin:10px 0 6px"><span>${done} of ${total} complete</span></div>
+    <div class="bar"><i style="width:${total ? done / total * 100 : 0}%"></i></div>
+    <h3>Lessons & quizzes</h3><div class="list">${mods}</div>
+    <h3>Hands-on sign-offs</h3><p class="small muted" style="margin-top:0">A QC Lead watches you do each task on site and signs it off.</p><div class="list">${pr}</div>
+  </div>`;
+}
+
+async function home(){
+  loading();
+  try {
+    const d = await api("home"); S.data = d;
+    app.innerHTML = `<h1>Hi ${esc(d.employee.name.split(" ")[0])}</h1>
+      ${docsCard(d.documents, true)}
+      ${d.courses.length ? d.courses.map((c) => courseHTML(c, { self: true })).join("") : '<div class="card">No training is assigned yet.</div>'}
+      <div class="row no-print"><button class="btn ghost" id="tr">My training record</button></div>`;
+    app.querySelectorAll("[data-lesson]").forEach((b) => b.onclick = () => go("lesson", b.dataset.lesson));
+    app.querySelectorAll("[data-doc]").forEach((b) => b.onclick = () => go("doc", b.dataset.doc));
+    $("#tr").onclick = () => go("transcript", S.me.id);
+  } catch (e) { app.innerHTML = ""; showErr(e); }
+}
+
+// ===== Lesson & quiz =====
+async function lesson(moduleId){
+  loading();
+  try {
+    const m = await api("lesson", { moduleId });
+    const prog = S.data?.courses.flatMap((c) => c.modules).find((x) => x.id === moduleId);
+    app.innerHTML = `<div class="row no-print" style="margin-bottom:10px"><button class="btn ghost sm" id="back">← Back</button></div>
+      <div class="card lesson"><h1>${esc(m.name)}</h1>${md(m.lesson)}
+        ${m.documents?.length ? `<h3>Full documents</h3><div class="row">${m.documents.map((d) => `<button class="btn ghost sm" data-doc="${d.id}">📄 ${esc(d.title)}</button>`).join("")}</div>` : ""}</div>
+      <div class="card"><h2>Quiz</h2>
+        <p>${m.drawn} questions picked at random. You need <b>${pct(m.passMark)}</b> to pass, and every question marked <span class="crit">★ Critical</span> must be right.</p>
+        ${prog?.passed ? `<p class="small muted">You already passed this on ${fmtDate(prog.passedDate)}. Taking it again won't change that.</p>` : ""}
+        <button class="btn green" id="go">Start the quiz</button></div>`;
+    $("#back").onclick = () => go("home");
+    app.querySelectorAll("[data-doc]").forEach((b) => b.onclick = () => go("doc", b.dataset.doc));
+    $("#go").onclick = startQuiz.bind(null, moduleId);
+  } catch (e) { app.innerHTML = ""; showErr(e); }
+}
+
+async function startQuiz(moduleId){
+  loading();
+  try {
+    const q = await api("startQuiz", { moduleId });
+    S.quiz = { ...q, i: 0, answers: {} };
+    window.onbeforeunload = () => "Your quiz isn't submitted yet.";
+    drawQuestion();
+  } catch (e) { app.innerHTML = '<div class="row"><button class="btn ghost sm" id="back">← Back</button></div>'; $("#back").onclick = () => go("home"); showErr(e); }
+}
+
+function drawQuestion(){
+  const Q = S.quiz, q = Q.questions[Q.i], n = Q.questions.length;
+  const answered = Object.keys(Q.answers).length;
+  app.innerHTML = `<div class="card">
+    <div class="row small muted" style="justify-content:space-between"><span>${esc(Q.module.name)}</span><span>Question ${Q.i + 1} of ${n}</span></div>
+    <div class="bar" style="margin:10px 0 16px"><i style="width:${(Q.i + 1) / n * 100}%;background:var(--navy)"></i></div>
+    ${q.critical ? '<div class="crit">★ Critical question</div>' : ""}
+    <div class="q">${esc(q.text)}</div>
+    ${q.choices.map((c) => `<button class="choice ${Q.answers[q.id] === c.key ? "on" : ""}" data-k="${c.key}">${esc(c.text)}</button>`).join("")}
+    <div class="row" style="justify-content:space-between;margin-top:16px">
+      <button class="btn ghost" id="prev" ${Q.i === 0 ? "disabled" : ""}>← Back</button>
+      ${Q.i < n - 1 ? `<button class="btn" id="next" ${Q.answers[q.id] ? "" : "disabled"}>Next →</button>` : `<button class="btn green" id="sub">Submit (${answered}/${n} answered)</button>`}
+    </div></div>`;
+  app.querySelectorAll(".choice").forEach((b) => b.onclick = () => { Q.answers[q.id] = b.dataset.k; drawQuestion(); });
+  $("#prev").onclick = () => { Q.i--; drawQuestion(); };
+  if ($("#next")) $("#next").onclick = () => { Q.i++; drawQuestion(); };
+  if ($("#sub")) $("#sub").onclick = submitQuiz;
+}
+
+async function submitQuiz(){
+  const Q = S.quiz, missing = Q.questions.length - Object.keys(Q.answers).length;
+  if (missing && !confirm(`${missing} question${missing > 1 ? "s are" : " is"} unanswered and will be marked wrong. Submit anyway?`)) return;
+  loading();
+  try {
+    const r = await api("submitQuiz", { attemptId: Q.attemptId, answers: Q.answers });
+    window.onbeforeunload = null; const moduleId = Q.module.id; S.quiz = null;
+    app.innerHTML = `<div class="banner ${r.passed ? "pass" : "fail"}"><div class="big">${r.passed ? "Passed" : "Not passed"}</div>
+        <div style="font-size:20px;font-weight:700">${r.correct} of ${r.total} right (${pct(r.score)})</div>
+        <div>${r.passed ? "Nice work. This module is complete." : r.criticalMissed && r.score >= r.passMark ? "You missed a critical question. Critical questions must be answered correctly." : `You need ${pct(r.passMark)} to pass.`}</div>
+        ${!r.passed ? `<div style="margin-top:8px;font-weight:600">${r.locked ? "This quiz is now locked. A QC Lead needs to go over it with you and unlock it." : `${r.attemptsLeft} attempt${r.attemptsLeft === 1 ? "" : "s"} left before a QC Lead review is needed.`}</div>` : ""}
+      </div>
+      <div class="card"><h2>Your answers</h2>
+        ${r.results.map((x, i) => `<div class="result ${x.correct ? "ok" : "no"}"><div class="small muted">${i + 1}. ${x.critical ? '<span class="crit">★ Critical</span>' : ""}</div><b>${esc(x.text)}</b>
+          <div>${x.correct ? "✓" : "✗"} Your answer: ${esc(x.yourAnswer)}</div>${x.rightAnswer ? `<div style="color:var(--green)">Correct answer: ${esc(x.rightAnswer)}</div>` : ""}</div>`).join("")}
+      </div>
+      <div class="row"><button class="btn" id="home">Back to my training</button>${!r.passed && !r.locked ? '<button class="btn ghost" id="again">Review the lesson and try again</button>' : ""}</div>`;
+    $("#home").onclick = () => go("home");
+    if ($("#again")) $("#again").onclick = () => go("lesson", moduleId);
+  } catch (e) { app.innerHTML = ""; showErr(e); }
+}
+
+// ===== QC Lead =====
+async function trainees(){
+  if (!isLead()) return go("home");
+  loading();
+  try {
+    const d = await api("trainees");
+    const draw = (filter = "") => {
+      const f = filter.toLowerCase();
+      const ppl = d.people.filter((p) => !f || p.name.toLowerCase().includes(f) || String(p.employeeId).includes(f) || (p.site || "").toLowerCase().includes(f));
+      $("#plist").innerHTML = ppl.map((p) => `<div class="item" data-p="${p.id}" style="cursor:pointer">
+        <div class="txt"><b>${esc(p.name)}</b><span class="small muted">#${esc(p.employeeId)}${p.site ? " · " + esc(p.site) : ""} · ${esc(p.role)}</span></div>
+        <div class="small" style="text-align:right">Quizzes ${p.modulesPassed}/${d.totalModules}<br>Sign-offs ${p.practicalSigned}/${d.totalPractical}</div>
+        ${p.locked ? '<span class="pill r">Needs review</span>' : p.modulesPassed === d.totalModules && p.practicalSigned === d.totalPractical && d.totalModules ? '<span class="pill g">Complete</span>' : ""}
+      </div>`).join("") || '<div class="item muted">No one matches.</div>';
+      app.querySelectorAll("[data-p]").forEach((el) => el.onclick = () => go("trainee", el.dataset.p));
+    };
+    app.innerHTML = `<h1>Trainees</h1><input type="search" id="q" placeholder="Search name, ID or site"><div class="list" id="plist" style="margin-top:12px"></div>`;
+    $("#q").oninput = (e) => draw(e.target.value); draw();
+  } catch (e) { app.innerHTML = ""; showErr(e); }
+}
+
+async function trainee(empId, pre){
+  if (!pre) loading();
+  try {
+    const d = pre || await api("trainee", { employeeId: empId }); S.viewing = d;
+    app.innerHTML = `<div class="row no-print" style="margin-bottom:10px"><button class="btn ghost sm" id="back">← Trainees</button><button class="btn ghost sm" id="tr">Training record</button></div>
+      <h1>${esc(d.employee.name)} <span class="small muted">#${esc(d.employee.employeeId)}</span></h1>
+      ${d.courses.map((c) => courseHTML(c, { lead: true })).join("")}
+      ${docsCard(d.documents, false)}`;
+    $("#back").onclick = () => go("trainees");
+    $("#tr").onclick = () => go("transcript", empId);
+    app.querySelectorAll("[data-sign]").forEach((b) => b.onclick = () => signDialog(d, b.dataset.sign));
+    app.querySelectorAll("[data-unlock]").forEach((b) => b.onclick = async () => {
+      if (!confirm(`Unlock this quiz for ${d.employee.name}? Do this after you've gone over the material with them. They'll get ${3} more attempts.`)) return;
+      b.disabled = true;
+      try { trainee(empId, await api("unlock", { employeeId: empId, moduleId: b.dataset.unlock })); } catch (e) { showErr(e); b.disabled = false; }
+    });
+  } catch (e) { app.innerHTML = ""; showErr(e); }
+}
+
+function signDialog(d, practicalId){
+  const p = d.courses.flatMap((c) => c.practical).find((x) => x.id === practicalId);
+  const m = document.createElement("div"); m.className = "modal";
+  m.innerHTML = `<div class="card"><h2>Sign off: ${esc(p.task)}</h2>
+    <p class="small muted">Confirm you watched <b>${esc(d.employee.name)}</b> do this on site:</p><p>${esc(p.confirms)}</p>
+    <label for="nt">Notes (where, which cell, anything to record)</label><textarea id="nt" placeholder="e.g. AOB 324, mechanical, Oct 16"></textarea>
+    <label style="display:flex;gap:10px;align-items:center;font-weight:500"><input type="checkbox" id="ck" style="width:24px;height:24px"> I watched ${esc(d.employee.name.split(" ")[0])} do this correctly.</label>
+    <div class="row" style="margin-top:16px;justify-content:flex-end"><button class="btn ghost" id="cx">Cancel</button><button class="btn green" id="ok" disabled>Sign off as ${esc(S.me.name)}</button></div></div>`;
+  document.body.append(m);
+  m.querySelector("#ck").onchange = (e) => m.querySelector("#ok").disabled = !e.target.checked;
+  m.querySelector("#cx").onclick = () => m.remove();
+  m.querySelector("#ok").onclick = async (e) => {
+    e.target.disabled = true;
+    try { const r = await api("signoff", { employeeId: d.employee.id, practicalId, notes: m.querySelector("#nt").value }); m.remove(); trainee(d.employee.id, r); }
+    catch (err) { showErr(err, m.querySelector(".card")); e.target.disabled = false; }
+  };
+}
+
+// ===== Transcript (printable training record) =====
+async function transcript(empId){
+  loading();
+  try {
+    const [d, hist] = await Promise.all([empId === S.me.id ? api("home") : api("trainee", { employeeId: empId }), api("history", { employeeId: empId })]);
+    const modName = Object.fromEntries(d.courses.flatMap((c) => c.modules).map((m) => [m.id, m.name]));
+    app.innerHTML = `<div class="row no-print" style="margin-bottom:10px"><button class="btn ghost sm" id="back">← Back</button><button class="btn sm" onclick="print()">Print / Save as PDF</button></div>
+      <div class="card">
+        <div class="row" style="justify-content:space-between;align-items:flex-start"><div><div style="font-weight:800;color:var(--navy);font-size:20px">AIME Automation</div><div class="muted">Employee Training Record</div></div>
+        <div class="small" style="text-align:right">Printed ${fmtDT(new Date().toISOString())}</div></div>
+        <table style="margin:16px 0"><tr><th style="width:30%">Employee</th><td>${esc(d.employee.name)}</td></tr><tr><th>Employee ID</th><td>${esc(d.employee.employeeId)}</td></tr>
+          ${d.employee.site ? `<tr><th>Site</th><td>${esc(d.employee.site)}</td></tr>` : ""}${d.employee.classification ? `<tr><th>Classification</th><td>${esc(d.employee.classification)}</td></tr>` : ""}</table>
+        ${d.courses.map((c) => `
+          <h2 style="margin-top:20px">${esc(c.name)}: ${c.status === "Qualified" ? `Qualified ${fmtDate(c.qualifiedDate)}${c.expires ? " (expires " + fmtDate(c.expires) + ")" : ""}` : esc(c.status)}</h2>
+          <h3>Knowledge quizzes</h3>
+          <table><tr><th>Module</th><th>Result</th><th>Date passed</th><th>Attempts</th></tr>
+          ${c.modules.map((m) => `<tr><td>${esc(m.name)}</td><td>${m.passed ? "Passed " + pct(m.passedScore) : "Not passed"}</td><td>${fmtDate(m.passedDate)}</td><td>${m.attempts}</td></tr>`).join("")}</table>
+          <h3>Practical sign-offs</h3>
+          <table><tr><th>Task</th><th>Signed off by</th><th>Date</th><th>Notes</th></tr>
+          ${c.practical.map((p) => `<tr><td>${esc(p.code)} ${esc(p.task)}</td><td>${esc(p.signedBy || "")}</td><td>${fmtDate(p.signedAt)}</td><td>${esc(p.notes || "")}</td></tr>`).join("")}</table>`).join("")}
+        ${d.documents?.length ? `<h2 style="margin-top:20px">Required reading</h2>
+          <table><tr><th>Document</th><th>Version</th><th>Acknowledged</th></tr>
+          ${d.documents.map((x) => `<tr><td>${esc(x.title)}</td><td>${esc(x.version)}</td><td>${x.current ? fmtDT(x.acknowledgedAt) : x.previousVersion ? `Not yet (read v${esc(x.previousVersion)})` : "Not yet"}</td></tr>`).join("")}</table>` : ""}
+        <h3 style="margin-top:20px">Quiz attempt log</h3>
+        <table><tr><th>Date</th><th>Module</th><th>Score</th><th>Result</th></tr>
+        ${hist.map((h) => `<tr><td>${fmtDT(h.submitted)}</td><td>${esc(modName[h.module] || "")}</td><td>${h.correct}/${h.total} (${pct(h.score)})</td><td>${h.passed ? "Pass" : "Fail" + (h.criticalMissed ? " (critical missed)" : "")}${h.reviewed ? " · reviewed by lead" : ""}</td></tr>`).join("") || '<tr><td colspan="4" class="muted">No attempts yet</td></tr>'}</table>
+        <p class="small muted" style="margin-top:16px">Quiz results are graded by the training system and timestamped. Practical sign-offs are recorded under the signing QC Lead's own login.</p>
+      </div>`;
+    $("#back").onclick = () => go(empId === S.me.id ? "home" : "trainee", empId);
+  } catch (e) { app.innerHTML = ""; showErr(e); }
+}
+
+// ===== Library =====
+function ackPill(x){
+  if (!x.ackRequired) return "";
+  if (x.current) return `<span class="pill g">Acknowledged</span>`;
+  if (x.previousVersion) return `<span class="pill a">New version: re-acknowledge</span>`;
+  return `<span class="pill r">Must read</span>`;
+}
+function docsCard(list, self){
+  if (!list?.length) return "";
+  const open = list.filter((x) => !x.current).length;
+  if (self && !open) return "";
+  return `<div class="card"><div class="row" style="justify-content:space-between"><h2 style="margin:0">${self ? "To read" : "Required reading"}</h2>
+      <span class="small muted">${list.length - open} of ${list.length} acknowledged</span></div>
+    <p class="small muted" style="margin:6px 0 10px">${self ? "Open each one, read it, and tap “I have read and understand this” at the bottom." : "Documents this person must read and acknowledge."}</p>
+    <div class="list">${(self ? list.filter((x) => !x.current) : list).map((x) => `<div class="item"><div class="txt"><b>${esc(x.title)}</b><span class="small muted">v${esc(x.version)} · ${esc(x.category)}</span>
+      <div>${ackPill(x)} ${x.current ? `<span class="small muted">${fmtDate(x.acknowledgedAt)}</span>` : ""}</div></div>
+      ${self ? `<button class="btn sm" data-doc="${x.id}">Read</button>` : ""}</div>`).join("")}</div></div>`;
+}
+
+async function library(q = ""){
+  if (!q) loading();
+  try {
+    const docs = await api("library", { q });
+    const groups = {};
+    docs.forEach((d) => (groups[d.category] ??= []).push(d));
+    const body = docs.length ? Object.entries(groups).map(([cat, ds]) => `<div class="cat">${esc(cat)}</div><div class="list">${ds.map((d) => `
+        <div class="item" data-doc="${d.id}" style="cursor:pointer"><div class="num">📄</div><div class="txt"><b>${esc(d.title)}</b>
+          <span class="small muted">v${esc(d.version)}${d.effective ? " · effective " + fmtDate(d.effective) : ""}${d.leadsOnly ? " · Leads only" : ""}</span>
+          ${d.snippet ? `<div class="snippet">${esc(d.snippet)}</div>` : d.summary ? `<div class="snippet">${esc(d.summary)}</div>` : ""}</div>${ackPill(d)}</div>`).join("")}</div>`).join("")
+      : `<div class="card muted">${q ? "Nothing matches “" + esc(q) + "”." : "No documents yet."}</div>`;
+    if (q && $("#libres")) { $("#libres").innerHTML = body; bindDocs(); return; }
+    app.innerHTML = `<h1>Library</h1><p class="muted" style="margin-top:-6px">Manuals, guides and procedures. Search finds words inside the documents too.</p>
+      <input type="search" id="lq" placeholder="Search, e.g. bend radius, Red Tag, SCN" value="${esc(q)}"><div id="libres">${body}</div>`;
+    let t; $("#lq").oninput = (e) => { clearTimeout(t); t = setTimeout(() => library(e.target.value.trim() || " "), 350); };
+    bindDocs();
+  } catch (e) { app.innerHTML = ""; showErr(e); }
+}
+function bindDocs(){ app.querySelectorAll("[data-doc]").forEach((el) => el.onclick = () => go("doc", el.dataset.doc)); }
+
+async function docView(id, pre){
+  if (!pre) loading();
+  try {
+    const d = pre || await api("document", { documentId: id });
+    const ack = !d.ackRequired ? "" : d.current
+      ? `<div class="ackbar"><span class="pill g">✓ Acknowledged</span><span class="small">You acknowledged version ${esc(d.version)} on ${fmtDT(d.acknowledgedAt)}.</span></div>`
+      : `<div class="ackbar no-print"><label style="display:flex;gap:10px;align-items:center;margin:0;font-weight:600;flex:1;min-width:220px"><input type="checkbox" id="ackck" style="width:26px;height:26px;flex:none">I have read and understand this document (version ${esc(d.version)}).</label>
+          <button class="btn green" id="ackbtn" disabled>Acknowledge</button></div>`;
+    app.innerHTML = `<div class="row no-print" style="margin-bottom:10px"><button class="btn ghost sm" id="back">← Library</button><button class="btn ghost sm" onclick="print()">Print</button>
+        ${d.files.map((f) => `<a class="btn ghost sm" href="${esc(f.url)}" target="_blank" rel="noopener">⬇ ${esc(f.filename)}</a>`).join("")}</div>
+      <div class="card doc">
+        <div class="small muted">${esc(d.category)}</div><h1 style="margin-bottom:4px">${esc(d.title)}</h1>
+        <div class="row small muted" style="margin-bottom:8px"><span>Version ${esc(d.version)}</span>${d.effective ? `<span>· Effective ${fmtDate(d.effective)}</span>` : ""} ${ackPill(d)}</div>
+        ${d.previousVersion && !d.current ? `<div class="callout">This document was updated since you last acknowledged it (you read v${esc(d.previousVersion)}).${d.revisionNotes ? " What changed: " + esc(d.revisionNotes) : ""}</div>` : ""}
+        ${d.modules?.length ? `<p class="small">Used in training: ${d.modules.map((m) => esc(m.name)).join(", ")}</p>` : ""}
+        ${md(d.content)}
+        ${ack}
+      </div>`;
+    $("#back").onclick = () => go("library");
+    if ($("#ackck")) {
+      $("#ackck").onchange = (e) => $("#ackbtn").disabled = !e.target.checked;
+      $("#ackbtn").onclick = async (e) => { e.target.disabled = true; try { docView(id, await api("acknowledge", { documentId: id })); } catch (err) { showErr(err); e.target.disabled = false; } };
+    }
+  } catch (e) { app.innerHTML = '<div class="row"><button class="btn ghost sm" id="back">← Library</button></div>'; $("#back").onclick = () => go("library"); showErr(e); }
+}
+
+// ===== Start =====
+const saved = store.get("session");
+if (saved?.token) { S.token = saved.token; S.me = saved.me; bumpIdle(); go("home"); } else { renderHeader(); renderLogin(); }
+</script>
+</body>
+</html>
