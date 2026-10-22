@@ -87,6 +87,7 @@
   <div class="brand">AIME<small>Training</small></div>
   <div class="sp"></div>
   <div class="who" id="who"></div>
+  <button id="lang" type="button" title="Language / Idioma">Español</button>
   <button id="signout" hidden>Sign out</button>
 </header>
 <nav class="tabs no-print" id="tabs" hidden></nav>
@@ -97,6 +98,99 @@
 const API_URL = "https://vbfspyruvaoqmhuutphl.supabase.co/functions/v1/training"; // Supabase function address
 const IDLE_MINUTES = 10; // sign out automatically after this long with no taps (shared tablets)
 
+// ===== Language =====
+// Screen text in English and Spanish. Course content comes from Airtable's "(ES)" fields and falls back to English.
+const I18N = {
+  en: {
+    signout: "Sign out", switchLang: "Español", tabHome: "My training", tabLibrary: "Library", tabTrainees: "Trainees",
+    signIn: "Sign in", signInHelp: "Use your Employee ID and training PIN. Ask a QC Lead if you don't have a PIN yet.",
+    empId: "Employee ID", pin: "PIN", idleOut: (n) => `Signed out after ${n} minutes without activity.`,
+    leaveQuiz: "Leave this quiz? Your answers will not be saved.", leaveQuizShort: "Leave this quiz?",
+    noResponse: "The server didn't respond properly. Check the connection and try again.", wrong: "Something went wrong",
+    qualified: "Qualified", inTraining: "In training", expired: "Expired", notStarted: "Not started",
+    passedPct: (p) => `Passed ${p}`, lockedFails: (n) => `Locked: ${n} failed attempts`, notPassedYet: "Not passed yet",
+    bestLeft: (b, n) => `best ${b}, ${n} tr${n === 1 ? "y" : "ies"} left`, review: "Review", tryAgain: "Try again", start: "Start", unlock: "Unlock",
+    signedOff: "Signed off", waitingLead: "Waiting for a QC Lead", signOffBtn: "Sign off",
+    qualifiedOn: (d, e) => `Qualified ${d}${e ? " · expires " + e : ""}`, nOfComplete: (a, b) => `${a} of ${b} complete`,
+    lessonsQuizzes: "Lessons & quizzes", handsOn: "Hands-on sign-offs", handsOnHelp: "A QC Lead watches you do each task on site and signs it off.",
+    hi: (n) => `Hi ${n}`, noTraining: "No training is assigned yet.", myRecord: "My training record",
+    back: "← Back", fullDocs: "Full documents", quiz: "Quiz",
+    quizRules: (n, p) => `${n} questions picked at random. You need <b>${p}</b> to pass, and every question marked <span class="crit">★ Critical</span> must be right.`,
+    alreadyPassed: (d) => `You already passed this on ${d}. Taking it again won't change that.`, startQuiz: "Start the quiz",
+    notSubmitted: "Your quiz isn't submitted yet.", questionNofM: (i, n) => `Question ${i} of ${n}`, critQ: "★ Critical question", critical: "★ Critical",
+    prev: "← Back", next: "Next →", submit: (a, n) => `Submit (${a}/${n} answered)`,
+    unanswered: (m) => `${m} question${m > 1 ? "s are" : " is"} unanswered and will be marked wrong. Submit anyway?`,
+    passed: "Passed", notPassed: "Not passed", nRight: (c, t, p) => `${c} of ${t} right (${p})`, niceWork: "Nice work. This module is complete.",
+    missedCrit: "You missed a critical question. Critical questions must be answered correctly.", needPct: (p) => `You need ${p} to pass.`,
+    nowLocked: "This quiz is now locked. A QC Lead needs to go over it with you and unlock it.",
+    attemptsLeft: (n) => `${n} attempt${n === 1 ? "" : "s"} left before a QC Lead review is needed.`,
+    yourAnswers: "Your answers", yourAnswer: "Your answer", correctAnswer: "Correct answer", backToTraining: "Back to my training", reviewAgain: "Review the lesson and try again",
+    printPdf: "Print / Save as PDF", record: "Employee Training Record", printed: "Printed", employee: "Employee", site: "Site", classification: "Classification",
+    knowledgeQuizzes: "Knowledge quizzes", module: "Module", result: "Result", datePassed: "Date passed", attemptsCol: "Attempts", practicalSO: "Practical sign-offs",
+    task: "Task", signedBy: "Signed off by", date: "Date", notes: "Notes", requiredReading: "Required reading", document: "Document", version: "Version", acknowledged: "Acknowledged",
+    notYetRead: (v) => `Not yet (read v${v})`, notYet: "Not yet", attemptLog: "Quiz attempt log", score: "Score", pass: "Pass", fail: "Fail", critMissedShort: " (critical missed)",
+    reviewedByLead: " · reviewed by lead", noAttempts: "No attempts yet",
+    recordNote: "Quiz results are graded by the training system and timestamped. Practical sign-offs are recorded under the signing QC Lead's own login.",
+    ackd: "Acknowledged", reAck: "New version: re-acknowledge", mustRead: "Must read", toRead: "To read", nOfAck: (a, b) => `${a} of ${b} acknowledged`,
+    toReadHelp: "Open each one, read it, and tap “I have read and understand this” at the bottom.", reqHelp: "Documents this person must read and acknowledge.", read: "Read",
+    effective: "effective", effectiveCap: "Effective", leadsOnly: "Leads only", nothingMatches: (q) => `Nothing matches “${q}”.`, noDocs: "No documents yet.",
+    libraryTitle: "Library", libraryHelp: "Manuals, guides and procedures. Search finds words inside the documents too.", libSearch: "Search, e.g. bend radius, Red Tag, SCN",
+    backLibrary: "← Library", print: "Print", youAcked: (v, d) => `You acknowledged version ${v} on ${d}.`, iRead: (v) => `I have read and understand this document (version ${v}).`,
+    ackBtn: "Acknowledge", updatedSince: (v) => `This document was updated since you last acknowledged it (you read v${v}).`, whatChanged: " What changed: ",
+    usedIn: "Used in training: ", draftEs: "", notTranslated: "",
+  },
+  es: {
+    signout: "Salir", switchLang: "English", tabHome: "Mi capacitación", tabLibrary: "Biblioteca", tabTrainees: "Aprendices",
+    signIn: "Iniciar sesión", signInHelp: "Use su número de empleado y su PIN de capacitación. Si todavía no tiene PIN, pídaselo a un QC Lead.",
+    empId: "Número de empleado", pin: "PIN", idleOut: (n) => `Se cerró la sesión después de ${n} minutos sin actividad.`,
+    leaveQuiz: "¿Salir de esta prueba? Sus respuestas no se guardarán.", leaveQuizShort: "¿Salir de esta prueba?",
+    noResponse: "El servidor no respondió bien. Revise la conexión e intente de nuevo.", wrong: "Algo salió mal",
+    qualified: "Calificado", inTraining: "En capacitación", expired: "Vencido", notStarted: "Sin empezar",
+    passedPct: (p) => `Aprobado ${p}`, lockedFails: (n) => `Bloqueado: ${n} intentos fallidos`, notPassedYet: "Todavía no aprobado",
+    bestLeft: (b, n) => `mejor ${b}, ${n} intento${n === 1 ? "" : "s"} más`, review: "Repasar", tryAgain: "Intentar de nuevo", start: "Empezar", unlock: "Desbloquear",
+    signedOff: "Firmado", waitingLead: "Esperando a un QC Lead", signOffBtn: "Firmar",
+    qualifiedOn: (d, e) => `Calificado ${d}${e ? " · vence " + e : ""}`, nOfComplete: (a, b) => `${a} de ${b} completados`,
+    lessonsQuizzes: "Lecciones y pruebas", handsOn: "Evaluaciones prácticas", handsOnHelp: "Un QC Lead lo observa hacer cada tarea en el sitio y la firma.",
+    hi: (n) => `Hola, ${n}`, noTraining: "Todavía no tiene capacitación asignada.", myRecord: "Mi registro de capacitación",
+    back: "← Atrás", fullDocs: "Documentos completos", quiz: "Prueba",
+    quizRules: (n, p) => `${n} preguntas elegidas al azar. Necesita <b>${p}</b> para aprobar, y toda pregunta marcada <span class="crit">★ Crítica</span> debe estar correcta.`,
+    alreadyPassed: (d) => `Usted ya aprobó esto el ${d}. Hacerla otra vez no cambia eso.`, startQuiz: "Empezar la prueba",
+    notSubmitted: "Su prueba todavía no se ha enviado.", questionNofM: (i, n) => `Pregunta ${i} de ${n}`, critQ: "★ Pregunta crítica", critical: "★ Crítica",
+    prev: "← Atrás", next: "Siguiente →", submit: (a, n) => `Enviar (${a}/${n} contestadas)`,
+    unanswered: (m) => `${m} pregunta${m > 1 ? "s" : ""} sin contestar se marcará${m > 1 ? "n" : ""} como incorrecta${m > 1 ? "s" : ""}. ¿Enviar de todos modos?`,
+    passed: "Aprobado", notPassed: "No aprobado", nRight: (c, t, p) => `${c} de ${t} correctas (${p})`, niceWork: "¡Buen trabajo! Este módulo está completo.",
+    missedCrit: "Falló una pregunta crítica. Las preguntas críticas deben contestarse correctamente.", needPct: (p) => `Necesita ${p} para aprobar.`,
+    nowLocked: "Esta prueba quedó bloqueada. Un QC Lead debe repasarla con usted y desbloquearla.",
+    attemptsLeft: (n) => `Le queda${n === 1 ? "" : "n"} ${n} intento${n === 1 ? "" : "s"} antes de que se necesite la revisión de un QC Lead.`,
+    yourAnswers: "Sus respuestas", yourAnswer: "Su respuesta", correctAnswer: "Respuesta correcta", backToTraining: "Volver a mi capacitación", reviewAgain: "Repasar la lección e intentar de nuevo",
+    printPdf: "Imprimir / Guardar como PDF", record: "Registro de capacitación del empleado", printed: "Impreso", employee: "Empleado", site: "Sitio", classification: "Clasificación",
+    knowledgeQuizzes: "Pruebas de conocimiento", module: "Módulo", result: "Resultado", datePassed: "Fecha de aprobación", attemptsCol: "Intentos", practicalSO: "Evaluaciones prácticas",
+    task: "Tarea", signedBy: "Firmado por", date: "Fecha", notes: "Notas", requiredReading: "Lectura obligatoria", document: "Documento", version: "Versión", acknowledged: "Confirmado",
+    notYetRead: (v) => `Todavía no (leyó la v${v})`, notYet: "Todavía no", attemptLog: "Registro de intentos", score: "Puntaje", pass: "Aprobó", fail: "No aprobó", critMissedShort: " (falló una crítica)",
+    reviewedByLead: " · revisado por un lead", noAttempts: "Todavía no hay intentos",
+    recordNote: "El sistema de capacitación califica las pruebas y registra la fecha y hora. Las evaluaciones prácticas se registran con el usuario del QC Lead que firma.",
+    ackd: "Confirmado", reAck: "Versión nueva: confirme otra vez", mustRead: "Lectura obligatoria", toRead: "Para leer", nOfAck: (a, b) => `${a} de ${b} confirmados`,
+    toReadHelp: "Abra cada uno, léalo y toque “He leído y entiendo este documento” al final.", reqHelp: "Documentos que esta persona debe leer y confirmar.", read: "Leer",
+    effective: "vigente desde", effectiveCap: "Vigente desde", leadsOnly: "Solo leads", nothingMatches: (q) => `No se encontró nada para “${q}”.`, noDocs: "Todavía no hay documentos.",
+    libraryTitle: "Biblioteca", libraryHelp: "Manuales, guías y procedimientos. La búsqueda también encuentra palabras dentro de los documentos.", libSearch: "Buscar, por ejemplo: extintor, arnés, LOTO",
+    backLibrary: "← Biblioteca", print: "Imprimir", youAcked: (v, d) => `Usted confirmó la versión ${v} (${d})`, iRead: (v) => `He leído y entiendo este documento (versión ${v}).`,
+    ackBtn: "Confirmar", updatedSince: (v) => `Este documento cambió desde la última vez que lo confirmó (usted leyó la v${v}).`, whatChanged: " Qué cambió: ",
+    usedIn: "Se usa en la capacitación: ",
+    draftEs: "Traducción al español en borrador. Si algo no está claro, pregunte a su supervisor. La versión en inglés es la oficial.",
+    notTranslated: "Esta parte todavía no está traducida al español, así que se muestra en inglés.",
+  },
+};
+const LANG_KEY = "aime-training-lang";
+const savedLang = () => { try { return localStorage.getItem(LANG_KEY); } catch { return null; } };
+let LANG = savedLang() === "es" ? "es" : "en";
+const t = (k, ...a) => { const v = I18N[LANG][k] ?? I18N.en[k]; return typeof v === "function" ? v(...a) : v; };
+function setLang(l, remember){ LANG = l === "es" ? "es" : "en"; document.documentElement.lang = LANG; if (remember) { try { localStorage.setItem(LANG_KEY, LANG); } catch {} } }
+// banner shown on translated content: draft notice if the Spanish exists, "not translated" if it fell back to English
+// Library categories are Airtable choices; show the common ones in Spanish
+const CAT_ES = { Safety: "Seguridad", Electrical: "Electricidad", "HR & Policies": "Recursos humanos y políticas", Quality: "Calidad", Other: "Otros" };
+const catName = (c) => (LANG === "es" && CAT_ES[c]) || c;
+const esNote = (translated) => LANG !== "es" ? "" : `<div class="callout" style="font-size:14px">${esc(translated ? t("draftEs") : t("notTranslated"))}</div>`;
+
 // ===== State =====
 let S = { token: null, me: null, view: "home", data: null, quiz: null, viewing: null };
 const store = { get(k){ try{ return JSON.parse(sessionStorage.getItem(k)); }catch{ return null; } }, set(k,v){ try{ sessionStorage.setItem(k, JSON.stringify(v)); }catch{} }, del(k){ try{ sessionStorage.removeItem(k); }catch{} } };
@@ -104,21 +198,22 @@ const $ = (s) => document.querySelector(s);
 const app = $("#app");
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const pct = (x) => Math.round((x ?? 0) * 100) + "%";
-const fmtDate = (d) => d ? new Date(d.length === 10 ? d + "T12:00:00" : d).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }) : "";
-const fmtDT = (d) => d ? new Date(d).toLocaleString(undefined, { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" }) : "";
+const loc = () => (LANG === "es" ? "es-US" : undefined);
+const fmtDate = (d) => d ? new Date(d.length === 10 ? d + "T12:00:00" : d).toLocaleDateString(loc(), { month: "short", day: "numeric", year: "numeric" }) : "";
+const fmtDT = (d) => d ? new Date(d).toLocaleString(loc(), { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" }) : "";
 const isLead = () => ["QC Lead", "Admin"].includes(S.me?.role);
 
 async function api(action, payload = {}) {
-  const r = await fetch(API_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action, token: S.token, ...payload }) });
-  const j = await r.json().catch(() => ({ error: "The server didn't respond properly. Check the connection and try again." }));
+  const r = await fetch(API_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action, token: S.token, lang: LANG, ...payload }) });
+  const j = await r.json().catch(() => ({ error: t("noResponse") }));
   if (r.status === 401 && action !== "login") { signOut(j.error); throw new Error(j.error); }
-  if (!r.ok) throw new Error(j.error || "Something went wrong");
+  if (!r.ok) throw new Error(j.error || t("wrong"));
   return j;
 }
 function loading(){ app.innerHTML = '<div class="spinner"></div>'; }
 function showErr(e, where = app){ const d = document.createElement("div"); d.className = "err"; d.textContent = e.message || String(e); where.prepend(d); window.scrollTo(0,0); }
 
-// Tiny markdown for lessons: ## headings, - / 1. lists, **bold**, _italic_
+// Tiny markdown for lessons and documents: ## / ### headings, - and 1. lists, > callouts, | tables, **bold**, _italic_
 function md(src) {
   const inline = (t) => esc(t).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/(^|[\s(])[_*](.+?)[_*](?=[\s.,;:)!?]|$)/g, "$1<i>$2</i>");
   let html = "", list = null;
@@ -136,11 +231,20 @@ function md(src) {
       html += `<div class="tbl"><table><tr>${rows[0].map((c) => `<th>${inline(c)}</th>`).join("")}</tr>${rows.slice(1).map((r) => `<tr>${r.map((c) => `<td>${inline(c)}</td>`).join("")}</tr>`).join("")}</table></div>`;
       continue;
     }
-    if ((m = l.match(/^>\s?(.*)/))) { close(); html += `<div class="callout ${/FAIL|IMPORTANT|WARNING|DANGER/.test(m[1]) ? "warn" : ""}">${inline(m[1])}</div>`; continue; }
+    if ((m = l.match(/^>\s?(.*)/))) { close(); html += `<div class="callout ${/FAIL|IMPORTANT|WARNING|DANGER|IMPORTANTE|ADVERTENCIA|PELIGRO/.test(m[1]) ? "warn" : ""}">${inline(m[1])}</div>`; continue; }
     if ((m = l.match(/^###\s+(.*)/))) { close(); html += `<h3>${inline(m[1])}</h3>`; }
     else if ((m = l.match(/^#{1,2}\s+(.*)/))) { close(); html += `<h2>${inline(m[1])}</h2>`; }
-    else if ((m = l.match(/^\s*[-*]\s+(.*)/))) { if (list !== "ul") { close(); html += "<ul>"; list = "ul"; } html += `<li>${inline(m[1])}</li>`; }
-    else if ((m = l.match(/^\s*\d+[.)]\s+(.*)/))) { if (list !== "ol") { close(); html += "<ol>"; list = "ol"; } html += `<li>${inline(m[1])}</li>`; }
+    else if ((m = l.match(/^(\s*)[-*]\s+(.*)/))) {
+      // an indented bullet under another bullet becomes a nested list item
+      const sub = m[1].length >= 2 && list === "ul";
+      if (!sub && list !== "ul") { close(); html += "<ul>"; list = "ul"; }
+      html += `<li${sub ? ' style="margin-left:22px;list-style:circle"' : ""}>${inline(m[2])}</li>`;
+    }
+    else if ((m = l.match(/^\s*(\d+)[.)]\s+(.*)/))) {
+      // keep the manual's numbering when a numbered list is split by a note or sub-list
+      if (list !== "ol") { close(); const n = parseInt(m[1], 10); html += n > 1 ? `<ol start="${n}">` : "<ol>"; list = "ol"; }
+      html += `<li>${inline(m[2])}</li>`;
+    }
     else { close(); html += `<p>${inline(l)}</p>`; }
   }
   close(); return html;
@@ -148,21 +252,29 @@ function md(src) {
 
 // ===== Session / idle =====
 let idleTimer;
-function bumpIdle(){ clearTimeout(idleTimer); if (S.token) idleTimer = setTimeout(() => signOut("Signed out after " + IDLE_MINUTES + " minutes without activity."), IDLE_MINUTES * 60000); }
+function bumpIdle(){ clearTimeout(idleTimer); if (S.token) idleTimer = setTimeout(() => signOut(t("idleOut", IDLE_MINUTES)), IDLE_MINUTES * 60000); }
 ["pointerdown","keydown"].forEach((ev) => addEventListener(ev, bumpIdle, { passive: true }));
 function signOut(msg){ S = { token: null, me: null, view: "home" }; store.del("session"); window.onbeforeunload = null; renderHeader(); renderLogin(msg); }
-$("#signout").onclick = () => { if (S.quiz && !confirm("Leave this quiz? Your answers will not be saved.")) return; signOut(); };
+$("#signout").onclick = () => { if (S.quiz && !confirm(t("leaveQuiz"))) return; signOut(); };
+$("#lang").onclick = () => {
+  if (S.quiz && !confirm(t("leaveQuiz"))) return;
+  S.quiz = null; window.onbeforeunload = null;
+  setLang(LANG === "es" ? "en" : "es", true); // a tap on the button is remembered on this device
+  if (S.me) go(S.view, S.arg); else { renderHeader(); renderLogin(); }
+};
 
 function renderHeader(){
   $("#who").innerHTML = S.me ? `<b>${esc(S.me.name)}</b><br><span style="opacity:.8">${esc(S.me.role)}${S.me.site ? " · " + esc(S.me.site) : ""}</span>` : "";
   $("#signout").hidden = !S.me;
+  $("#signout").textContent = t("signout");
+  $("#lang").textContent = t("switchLang");
   const tabs = $("#tabs");
   tabs.hidden = !S.me;
   if (!tabs.hidden) {
     const on = (v) => (v.includes(S.view) ? "on" : "");
-    tabs.innerHTML = `<button data-v="home" class="${on(["home", "lesson", "transcript"])}">My training</button><button data-v="library" class="${on(["library", "doc"])}">Library</button>` +
-      (isLead() ? `<button data-v="trainees" class="${on(["trainees", "trainee"])}">Trainees</button>` : "");
-    tabs.querySelectorAll("button").forEach((b) => b.onclick = () => { if (S.quiz && !confirm("Leave this quiz?")) return; S.quiz = null; window.onbeforeunload = null; go(b.dataset.v); });
+    tabs.innerHTML = `<button data-v="home" class="${on(["home", "lesson", "transcript"])}">${t("tabHome")}</button><button data-v="library" class="${on(["library", "doc"])}">${t("tabLibrary")}</button>` +
+      (isLead() ? `<button data-v="trainees" class="${on(["trainees", "trainee"])}">${t("tabTrainees")}</button>` : "");
+    tabs.querySelectorAll("button").forEach((b) => b.onclick = () => { if (S.quiz && !confirm(t("leaveQuizShort"))) return; S.quiz = null; window.onbeforeunload = null; go(b.dataset.v); });
   }
 }
 
@@ -170,13 +282,13 @@ function renderHeader(){
 function renderLogin(msg){
   app.innerHTML = `
   <div class="center"><div class="card login">
-    <h1>Sign in</h1>
-    <p class="muted">Use your Employee ID and training PIN. Ask a QC Lead if you don't have a PIN yet.</p>
+    <h1>${t("signIn")}</h1>
+    <p class="muted">${esc(t("signInHelp"))}</p>
     ${msg ? `<div class="err">${esc(msg)}</div>` : ""}
     <form id="lf" autocomplete="off">
-      <label for="eid">Employee ID</label><input id="eid" type="text" inputmode="numeric" autocomplete="off" required>
-      <label for="pin">PIN</label><input id="pin" type="password" inputmode="numeric" maxlength="6" autocomplete="off" required>
-      <div style="margin-top:18px"><button class="btn" style="width:100%" id="lb">Sign in</button></div>
+      <label for="eid">${t("empId")}</label><input id="eid" type="text" inputmode="numeric" autocomplete="off" required>
+      <label for="pin">${t("pin")}</label><input id="pin" type="password" inputmode="numeric" maxlength="6" autocomplete="off" required>
+      <div style="margin-top:18px"><button class="btn" style="width:100%" id="lb">${t("signIn")}</button></div>
     </form>
   </div></div>`;
   $("#eid").focus();
@@ -184,14 +296,17 @@ function renderLogin(msg){
     e.preventDefault(); $("#lb").disabled = true;
     try {
       const r = await api("login", { employeeId: $("#eid").value, pin: $("#pin").value });
-      S.token = r.token; S.me = r.me; store.set("session", { token: r.token, me: r.me }); bumpIdle(); go("home");
+      S.token = r.token; S.me = r.me; store.set("session", { token: r.token, me: r.me });
+      // the employee's Language setting in Airtable wins unless they already picked one on this device
+      if (!savedLang() && r.me.language) setLang(r.me.language);
+      bumpIdle(); go("home");
     } catch (err) { renderLogin(err.message); }
   };
 }
 
 // ===== Navigation =====
 async function go(view, arg){
-  S.view = view; renderHeader(); window.scrollTo(0,0);
+  S.view = view; S.arg = arg; renderHeader(); window.scrollTo(0,0);
   if (view === "home") return home();
   if (view === "trainees") return trainees();
   if (view === "trainee") return trainee(arg);
@@ -201,33 +316,34 @@ async function go(view, arg){
   if (view === "doc") return docView(arg);
 }
 
-function statusPill(s){ return s === "Qualified" ? '<span class="pill g">Qualified</span>' : s === "In Training" ? '<span class="pill a">In training</span>' : s === "Expired" ? '<span class="pill r">Expired</span>' : '<span class="pill n">Not started</span>'; }
+function statusPill(s){ return s === "Qualified" ? `<span class="pill g">${t("qualified")}</span>` : s === "In Training" ? `<span class="pill a">${t("inTraining")}</span>` : s === "Expired" ? `<span class="pill r">${t("expired")}</span>` : `<span class="pill n">${t("notStarted")}</span>`; }
+const statusText = (s) => ({ Qualified: t("qualified"), "In Training": t("inTraining"), Expired: t("expired"), "Not Started": t("notStarted") }[s] ?? s);
 
 function courseHTML(c, opts){
   const total = c.modules.length + c.practical.length;
   const done = c.modules.filter((m) => m.passed).length + c.practical.filter((p) => p.signed).length;
   const mods = c.modules.map((m, i) => {
     let st, action = "";
-    if (m.passed) st = `<span class="pill g">Passed ${pct(m.passedScore)}</span> <span class="small muted">${fmtDate(m.passedDate)}</span>`;
-    else if (m.locked) st = `<span class="pill r">Locked: ${m.failsSinceReview} failed attempts</span>`;
-    else if (m.attempts) st = `<span class="pill a">Not passed yet</span> <span class="small muted">best ${pct(m.best)}, ${m.maxAttempts - m.failsSinceReview} tr${m.maxAttempts - m.failsSinceReview === 1 ? "y" : "ies"} left</span>`;
-    else st = `<span class="pill n">Not started</span>`;
-    if (opts.self && !m.locked) action = `<button class="btn sm ${m.passed ? "ghost" : ""}" data-lesson="${m.id}">${m.passed ? "Review" : m.attempts ? "Try again" : "Start"}</button>`;
-    if (opts.lead && m.locked) action = `<button class="btn sm" data-unlock="${m.id}">Unlock</button>`;
+    if (m.passed) st = `<span class="pill g">${t("passedPct", pct(m.passedScore))}</span> <span class="small muted">${fmtDate(m.passedDate)}</span>`;
+    else if (m.locked) st = `<span class="pill r">${t("lockedFails", m.failsSinceReview)}</span>`;
+    else if (m.attempts) st = `<span class="pill a">${t("notPassedYet")}</span> <span class="small muted">${t("bestLeft", pct(m.best), m.maxAttempts - m.failsSinceReview)}</span>`;
+    else st = `<span class="pill n">${t("notStarted")}</span>`;
+    if (opts.self && !m.locked) action = `<button class="btn sm ${m.passed ? "ghost" : ""}" data-lesson="${m.id}">${m.passed ? t("review") : m.attempts ? t("tryAgain") : t("start")}</button>`;
+    if (opts.lead && m.locked) action = `<button class="btn sm" data-unlock="${m.id}">${t("unlock")}</button>`;
     return `<div class="item"><div class="num ${m.passed ? "done" : ""}">${m.passed ? "✓" : i + 1}</div><div class="txt"><b>${esc(m.name)}</b><div>${st}</div></div>${action}</div>`;
   }).join("");
   const pr = c.practical.map((p) => {
-    const st = p.signed ? `<span class="pill g">Signed off</span> <span class="small muted">${esc(p.signedBy)} · ${fmtDate(p.signedAt)}</span>` : `<span class="pill n">Waiting for a QC Lead</span>`;
-    const action = opts.lead && !p.signed ? `<button class="btn sm" data-sign="${p.id}">Sign off</button>` : "";
+    const st = p.signed ? `<span class="pill g">${t("signedOff")}</span> <span class="small muted">${esc(p.signedBy)} · ${fmtDate(p.signedAt)}</span>` : `<span class="pill n">${t("waitingLead")}</span>`;
+    const action = opts.lead && !p.signed ? `<button class="btn sm" data-sign="${p.id}">${t("signOffBtn")}</button>` : "";
     return `<div class="item"><div class="num ${p.signed ? "done" : ""}">${p.signed ? "✓" : esc(p.code)}</div><div class="txt"><b>${esc(p.task)}</b><div class="small muted">${esc(p.confirms)}</div><div>${st}</div></div>${action}</div>`;
   }).join("");
   return `<div class="card">
     <div class="row" style="justify-content:space-between"><h2 style="margin:0">${esc(c.name)}</h2>${statusPill(c.status)}</div>
-    ${c.status === "Qualified" ? `<p class="small" style="color:var(--green);font-weight:600">Qualified ${fmtDate(c.qualifiedDate)}${c.expires ? " · expires " + fmtDate(c.expires) : ""}</p>` : ""}
-    <div class="row small muted" style="margin:10px 0 6px"><span>${done} of ${total} complete</span></div>
+    ${c.status === "Qualified" ? `<p class="small" style="color:var(--green);font-weight:600">${t("qualifiedOn", fmtDate(c.qualifiedDate), c.expires ? fmtDate(c.expires) : "")}</p>` : ""}
+    <div class="row small muted" style="margin:10px 0 6px"><span>${t("nOfComplete", done, total)}</span></div>
     <div class="bar"><i style="width:${total ? done / total * 100 : 0}%"></i></div>
-    <h3>Lessons & quizzes</h3><div class="list">${mods}</div>
-    <h3>Hands-on sign-offs</h3><p class="small muted" style="margin-top:0">A QC Lead watches you do each task on site and signs it off.</p><div class="list">${pr}</div>
+    <h3>${t("lessonsQuizzes")}</h3><div class="list">${mods}</div>
+    ${c.practical.length ? `<h3>${t("handsOn")}</h3><p class="small muted" style="margin-top:0">${t("handsOnHelp")}</p><div class="list">${pr}</div>` : ""}
   </div>`;
 }
 
@@ -235,10 +351,10 @@ async function home(){
   loading();
   try {
     const d = await api("home"); S.data = d;
-    app.innerHTML = `<h1>Hi ${esc(d.employee.name.split(" ")[0])}</h1>
+    app.innerHTML = `<h1>${esc(t("hi", d.employee.name.split(" ")[0]))}</h1>
       ${docsCard(d.documents, true)}
-      ${d.courses.length ? d.courses.map((c) => courseHTML(c, { self: true })).join("") : '<div class="card">No training is assigned yet.</div>'}
-      <div class="row no-print"><button class="btn ghost" id="tr">My training record</button></div>`;
+      ${d.courses.length ? d.courses.map((c) => courseHTML(c, { self: true })).join("") : `<div class="card">${t("noTraining")}</div>`}
+      <div class="row no-print"><button class="btn ghost" id="tr">${t("myRecord")}</button></div>`;
     app.querySelectorAll("[data-lesson]").forEach((b) => b.onclick = () => go("lesson", b.dataset.lesson));
     app.querySelectorAll("[data-doc]").forEach((b) => b.onclick = () => go("doc", b.dataset.doc));
     $("#tr").onclick = () => go("transcript", S.me.id);
@@ -251,13 +367,13 @@ async function lesson(moduleId){
   try {
     const m = await api("lesson", { moduleId });
     const prog = S.data?.courses.flatMap((c) => c.modules).find((x) => x.id === moduleId);
-    app.innerHTML = `<div class="row no-print" style="margin-bottom:10px"><button class="btn ghost sm" id="back">← Back</button></div>
-      <div class="card lesson"><h1>${esc(m.name)}</h1>${md(m.lesson)}
-        ${m.documents?.length ? `<h3>Full documents</h3><div class="row">${m.documents.map((d) => `<button class="btn ghost sm" data-doc="${d.id}">📄 ${esc(d.title)}</button>`).join("")}</div>` : ""}</div>
-      <div class="card"><h2>Quiz</h2>
-        <p>${m.drawn} questions picked at random. You need <b>${pct(m.passMark)}</b> to pass, and every question marked <span class="crit">★ Critical</span> must be right.</p>
-        ${prog?.passed ? `<p class="small muted">You already passed this on ${fmtDate(prog.passedDate)}. Taking it again won't change that.</p>` : ""}
-        <button class="btn green" id="go">Start the quiz</button></div>`;
+    app.innerHTML = `<div class="row no-print" style="margin-bottom:10px"><button class="btn ghost sm" id="back">${t("back")}</button></div>
+      <div class="card lesson"><h1>${esc(m.name)}</h1>${esNote(m.translated)}${md(m.lesson)}
+        ${m.documents?.length ? `<h3>${t("fullDocs")}</h3><div class="row">${m.documents.map((d) => `<button class="btn ghost sm" data-doc="${d.id}">📄 ${esc(d.title)}</button>`).join("")}</div>` : ""}</div>
+      <div class="card"><h2>${t("quiz")}</h2>
+        <p>${t("quizRules", m.drawn, pct(m.passMark))}</p>
+        ${prog?.passed ? `<p class="small muted">${esc(t("alreadyPassed", fmtDate(prog.passedDate)))}</p>` : ""}
+        <button class="btn green" id="go">${t("startQuiz")}</button></div>`;
     $("#back").onclick = () => go("home");
     app.querySelectorAll("[data-doc]").forEach((b) => b.onclick = () => go("doc", b.dataset.doc));
     $("#go").onclick = startQuiz.bind(null, moduleId);
@@ -269,23 +385,24 @@ async function startQuiz(moduleId){
   try {
     const q = await api("startQuiz", { moduleId });
     S.quiz = { ...q, i: 0, answers: {} };
-    window.onbeforeunload = () => "Your quiz isn't submitted yet.";
+    window.onbeforeunload = () => t("notSubmitted");
     drawQuestion();
-  } catch (e) { app.innerHTML = '<div class="row"><button class="btn ghost sm" id="back">← Back</button></div>'; $("#back").onclick = () => go("home"); showErr(e); }
+  } catch (e) { app.innerHTML = `<div class="row"><button class="btn ghost sm" id="back">${t("back")}</button></div>`; $("#back").onclick = () => go("home"); showErr(e); }
 }
 
 function drawQuestion(){
   const Q = S.quiz, q = Q.questions[Q.i], n = Q.questions.length;
   const answered = Object.keys(Q.answers).length;
   app.innerHTML = `<div class="card">
-    <div class="row small muted" style="justify-content:space-between"><span>${esc(Q.module.name)}</span><span>Question ${Q.i + 1} of ${n}</span></div>
+    <div class="row small muted" style="justify-content:space-between"><span>${esc(Q.module.name)}</span><span>${t("questionNofM", Q.i + 1, n)}</span></div>
     <div class="bar" style="margin:10px 0 16px"><i style="width:${(Q.i + 1) / n * 100}%;background:var(--navy)"></i></div>
-    ${q.critical ? '<div class="crit">★ Critical question</div>' : ""}
+    ${LANG === "es" && !q.translated ? esNote(false) : ""}
+    ${q.critical ? `<div class="crit">${t("critQ")}</div>` : ""}
     <div class="q">${esc(q.text)}</div>
     ${q.choices.map((c) => `<button class="choice ${Q.answers[q.id] === c.key ? "on" : ""}" data-k="${c.key}">${esc(c.text)}</button>`).join("")}
     <div class="row" style="justify-content:space-between;margin-top:16px">
-      <button class="btn ghost" id="prev" ${Q.i === 0 ? "disabled" : ""}>← Back</button>
-      ${Q.i < n - 1 ? `<button class="btn" id="next" ${Q.answers[q.id] ? "" : "disabled"}>Next →</button>` : `<button class="btn green" id="sub">Submit (${answered}/${n} answered)</button>`}
+      <button class="btn ghost" id="prev" ${Q.i === 0 ? "disabled" : ""}>${t("prev")}</button>
+      ${Q.i < n - 1 ? `<button class="btn" id="next" ${Q.answers[q.id] ? "" : "disabled"}>${t("next")}</button>` : `<button class="btn green" id="sub">${t("submit", answered, n)}</button>`}
     </div></div>`;
   app.querySelectorAll(".choice").forEach((b) => b.onclick = () => { Q.answers[q.id] = b.dataset.k; drawQuestion(); });
   $("#prev").onclick = () => { Q.i--; drawQuestion(); };
@@ -295,21 +412,21 @@ function drawQuestion(){
 
 async function submitQuiz(){
   const Q = S.quiz, missing = Q.questions.length - Object.keys(Q.answers).length;
-  if (missing && !confirm(`${missing} question${missing > 1 ? "s are" : " is"} unanswered and will be marked wrong. Submit anyway?`)) return;
+  if (missing && !confirm(t("unanswered", missing))) return;
   loading();
   try {
     const r = await api("submitQuiz", { attemptId: Q.attemptId, answers: Q.answers });
     window.onbeforeunload = null; const moduleId = Q.module.id; S.quiz = null;
-    app.innerHTML = `<div class="banner ${r.passed ? "pass" : "fail"}"><div class="big">${r.passed ? "Passed" : "Not passed"}</div>
-        <div style="font-size:20px;font-weight:700">${r.correct} of ${r.total} right (${pct(r.score)})</div>
-        <div>${r.passed ? "Nice work. This module is complete." : r.criticalMissed && r.score >= r.passMark ? "You missed a critical question. Critical questions must be answered correctly." : `You need ${pct(r.passMark)} to pass.`}</div>
-        ${!r.passed ? `<div style="margin-top:8px;font-weight:600">${r.locked ? "This quiz is now locked. A QC Lead needs to go over it with you and unlock it." : `${r.attemptsLeft} attempt${r.attemptsLeft === 1 ? "" : "s"} left before a QC Lead review is needed.`}</div>` : ""}
+    app.innerHTML = `<div class="banner ${r.passed ? "pass" : "fail"}"><div class="big">${r.passed ? t("passed") : t("notPassed")}</div>
+        <div style="font-size:20px;font-weight:700">${t("nRight", r.correct, r.total, pct(r.score))}</div>
+        <div>${r.passed ? t("niceWork") : r.criticalMissed && r.score >= r.passMark ? t("missedCrit") : t("needPct", pct(r.passMark))}</div>
+        ${!r.passed ? `<div style="margin-top:8px;font-weight:600">${r.locked ? t("nowLocked") : t("attemptsLeft", r.attemptsLeft)}</div>` : ""}
       </div>
-      <div class="card"><h2>Your answers</h2>
-        ${r.results.map((x, i) => `<div class="result ${x.correct ? "ok" : "no"}"><div class="small muted">${i + 1}. ${x.critical ? '<span class="crit">★ Critical</span>' : ""}</div><b>${esc(x.text)}</b>
-          <div>${x.correct ? "✓" : "✗"} Your answer: ${esc(x.yourAnswer)}</div>${x.rightAnswer ? `<div style="color:var(--green)">Correct answer: ${esc(x.rightAnswer)}</div>` : ""}</div>`).join("")}
+      <div class="card"><h2>${t("yourAnswers")}</h2>
+        ${r.results.map((x, i) => `<div class="result ${x.correct ? "ok" : "no"}"><div class="small muted">${i + 1}. ${x.critical ? `<span class="crit">${t("critical")}</span>` : ""}</div><b>${esc(x.text)}</b>
+          <div>${x.correct ? "✓" : "✗"} ${t("yourAnswer")}: ${esc(x.yourAnswer)}</div>${x.rightAnswer ? `<div style="color:var(--green)">${t("correctAnswer")}: ${esc(x.rightAnswer)}</div>` : ""}</div>`).join("")}
       </div>
-      <div class="row"><button class="btn" id="home">Back to my training</button>${!r.passed && !r.locked ? '<button class="btn ghost" id="again">Review the lesson and try again</button>' : ""}</div>`;
+      <div class="row"><button class="btn" id="home">${t("backToTraining")}</button>${!r.passed && !r.locked ? `<button class="btn ghost" id="again">${t("reviewAgain")}</button>` : ""}</div>`;
     $("#home").onclick = () => go("home");
     if ($("#again")) $("#again").onclick = () => go("lesson", moduleId);
   } catch (e) { app.innerHTML = ""; showErr(e); }
@@ -331,7 +448,7 @@ async function trainees(){
       </div>`).join("") || '<div class="item muted">No one matches.</div>';
       app.querySelectorAll("[data-p]").forEach((el) => el.onclick = () => go("trainee", el.dataset.p));
     };
-    app.innerHTML = `<h1>Trainees</h1><input type="search" id="q" placeholder="Search name, ID or site"><div class="list" id="plist" style="margin-top:12px"></div>`;
+    app.innerHTML = `<h1>${t("tabTrainees")}</h1><input type="search" id="q" placeholder="Search name, ID or site"><div class="list" id="plist" style="margin-top:12px"></div>`;
     $("#q").oninput = (e) => draw(e.target.value); draw();
   } catch (e) { app.innerHTML = ""; showErr(e); }
 }
@@ -340,7 +457,7 @@ async function trainee(empId, pre){
   if (!pre) loading();
   try {
     const d = pre || await api("trainee", { employeeId: empId }); S.viewing = d;
-    app.innerHTML = `<div class="row no-print" style="margin-bottom:10px"><button class="btn ghost sm" id="back">← Trainees</button><button class="btn ghost sm" id="tr">Training record</button></div>
+    app.innerHTML = `<div class="row no-print" style="margin-bottom:10px"><button class="btn ghost sm" id="back">← ${t("tabTrainees")}</button><button class="btn ghost sm" id="tr">Training record</button></div>
       <h1>${esc(d.employee.name)} <span class="small muted">#${esc(d.employee.employeeId)}</span></h1>
       ${d.courses.map((c) => courseHTML(c, { lead: true })).join("")}
       ${docsCard(d.documents, false)}`;
@@ -379,27 +496,27 @@ async function transcript(empId){
   try {
     const [d, hist] = await Promise.all([empId === S.me.id ? api("home") : api("trainee", { employeeId: empId }), api("history", { employeeId: empId })]);
     const modName = Object.fromEntries(d.courses.flatMap((c) => c.modules).map((m) => [m.id, m.name]));
-    app.innerHTML = `<div class="row no-print" style="margin-bottom:10px"><button class="btn ghost sm" id="back">← Back</button><button class="btn sm" onclick="print()">Print / Save as PDF</button></div>
+    app.innerHTML = `<div class="row no-print" style="margin-bottom:10px"><button class="btn ghost sm" id="back">${t("back")}</button><button class="btn sm" onclick="print()">${t("printPdf")}</button></div>
       <div class="card">
-        <div class="row" style="justify-content:space-between;align-items:flex-start"><div><div style="font-weight:800;color:var(--navy);font-size:20px">AIME Automation</div><div class="muted">Employee Training Record</div></div>
-        <div class="small" style="text-align:right">Printed ${fmtDT(new Date().toISOString())}</div></div>
-        <table style="margin:16px 0"><tr><th style="width:30%">Employee</th><td>${esc(d.employee.name)}</td></tr><tr><th>Employee ID</th><td>${esc(d.employee.employeeId)}</td></tr>
-          ${d.employee.site ? `<tr><th>Site</th><td>${esc(d.employee.site)}</td></tr>` : ""}${d.employee.classification ? `<tr><th>Classification</th><td>${esc(d.employee.classification)}</td></tr>` : ""}</table>
+        <div class="row" style="justify-content:space-between;align-items:flex-start"><div><div style="font-weight:800;color:var(--navy);font-size:20px">AIME Automation</div><div class="muted">${t("record")}</div></div>
+        <div class="small" style="text-align:right">${t("printed")} ${fmtDT(new Date().toISOString())}</div></div>
+        <table style="margin:16px 0"><tr><th style="width:30%">${t("employee")}</th><td>${esc(d.employee.name)}</td></tr><tr><th>${t("empId")}</th><td>${esc(d.employee.employeeId)}</td></tr>
+          ${d.employee.site ? `<tr><th>${t("site")}</th><td>${esc(d.employee.site)}</td></tr>` : ""}${d.employee.classification ? `<tr><th>${t("classification")}</th><td>${esc(d.employee.classification)}</td></tr>` : ""}</table>
         ${d.courses.map((c) => `
-          <h2 style="margin-top:20px">${esc(c.name)}: ${c.status === "Qualified" ? `Qualified ${fmtDate(c.qualifiedDate)}${c.expires ? " (expires " + fmtDate(c.expires) + ")" : ""}` : esc(c.status)}</h2>
-          <h3>Knowledge quizzes</h3>
-          <table><tr><th>Module</th><th>Result</th><th>Date passed</th><th>Attempts</th></tr>
-          ${c.modules.map((m) => `<tr><td>${esc(m.name)}</td><td>${m.passed ? "Passed " + pct(m.passedScore) : "Not passed"}</td><td>${fmtDate(m.passedDate)}</td><td>${m.attempts}</td></tr>`).join("")}</table>
-          <h3>Practical sign-offs</h3>
-          <table><tr><th>Task</th><th>Signed off by</th><th>Date</th><th>Notes</th></tr>
-          ${c.practical.map((p) => `<tr><td>${esc(p.code)} ${esc(p.task)}</td><td>${esc(p.signedBy || "")}</td><td>${fmtDate(p.signedAt)}</td><td>${esc(p.notes || "")}</td></tr>`).join("")}</table>`).join("")}
-        ${d.documents?.length ? `<h2 style="margin-top:20px">Required reading</h2>
-          <table><tr><th>Document</th><th>Version</th><th>Acknowledged</th></tr>
-          ${d.documents.map((x) => `<tr><td>${esc(x.title)}</td><td>${esc(x.version)}</td><td>${x.current ? fmtDT(x.acknowledgedAt) : x.previousVersion ? `Not yet (read v${esc(x.previousVersion)})` : "Not yet"}</td></tr>`).join("")}</table>` : ""}
-        <h3 style="margin-top:20px">Quiz attempt log</h3>
-        <table><tr><th>Date</th><th>Module</th><th>Score</th><th>Result</th></tr>
-        ${hist.map((h) => `<tr><td>${fmtDT(h.submitted)}</td><td>${esc(modName[h.module] || "")}</td><td>${h.correct}/${h.total} (${pct(h.score)})</td><td>${h.passed ? "Pass" : "Fail" + (h.criticalMissed ? " (critical missed)" : "")}${h.reviewed ? " · reviewed by lead" : ""}</td></tr>`).join("") || '<tr><td colspan="4" class="muted">No attempts yet</td></tr>'}</table>
-        <p class="small muted" style="margin-top:16px">Quiz results are graded by the training system and timestamped. Practical sign-offs are recorded under the signing QC Lead's own login.</p>
+          <h2 style="margin-top:20px">${esc(c.name)}: ${c.status === "Qualified" ? t("qualifiedOn", fmtDate(c.qualifiedDate), c.expires ? fmtDate(c.expires) : "") : esc(statusText(c.status))}</h2>
+          <h3>${t("knowledgeQuizzes")}</h3>
+          <table><tr><th>${t("module")}</th><th>${t("result")}</th><th>${t("datePassed")}</th><th>${t("attemptsCol")}</th></tr>
+          ${c.modules.map((m) => `<tr><td>${esc(m.name)}</td><td>${m.passed ? t("passedPct", pct(m.passedScore)) : t("notPassed")}</td><td>${fmtDate(m.passedDate)}</td><td>${m.attempts}</td></tr>`).join("")}</table>
+          ${c.practical.length ? `<h3>${t("practicalSO")}</h3>
+          <table><tr><th>${t("task")}</th><th>${t("signedBy")}</th><th>${t("date")}</th><th>${t("notes")}</th></tr>
+          ${c.practical.map((p) => `<tr><td>${esc(p.code)} ${esc(p.task)}</td><td>${esc(p.signedBy || "")}</td><td>${fmtDate(p.signedAt)}</td><td>${esc(p.notes || "")}</td></tr>`).join("")}</table>` : ""}`).join("")}
+        ${d.documents?.length ? `<h2 style="margin-top:20px">${t("requiredReading")}</h2>
+          <table><tr><th>${t("document")}</th><th>${t("version")}</th><th>${t("acknowledged")}</th></tr>
+          ${d.documents.map((x) => `<tr><td>${esc(x.title)}</td><td>${esc(x.version)}</td><td>${x.current ? fmtDT(x.acknowledgedAt) : x.previousVersion ? esc(t("notYetRead", x.previousVersion)) : t("notYet")}</td></tr>`).join("")}</table>` : ""}
+        <h3 style="margin-top:20px">${t("attemptLog")}</h3>
+        <table><tr><th>${t("date")}</th><th>${t("module")}</th><th>${t("score")}</th><th>${t("result")}</th></tr>
+        ${hist.map((h) => `<tr><td>${fmtDT(h.submitted)}</td><td>${esc(modName[h.module] || "")}</td><td>${h.correct}/${h.total} (${pct(h.score)})</td><td>${h.passed ? t("pass") : t("fail") + (h.criticalMissed ? t("critMissedShort") : "")}${h.reviewed ? t("reviewedByLead") : ""}</td></tr>`).join("") || `<tr><td colspan="4" class="muted">${t("noAttempts")}</td></tr>`}</table>
+        <p class="small muted" style="margin-top:16px">${t("recordNote")}</p>
       </div>`;
     $("#back").onclick = () => go(empId === S.me.id ? "home" : "trainee", empId);
   } catch (e) { app.innerHTML = ""; showErr(e); }
@@ -408,20 +525,20 @@ async function transcript(empId){
 // ===== Library =====
 function ackPill(x){
   if (!x.ackRequired) return "";
-  if (x.current) return `<span class="pill g">Acknowledged</span>`;
-  if (x.previousVersion) return `<span class="pill a">New version: re-acknowledge</span>`;
-  return `<span class="pill r">Must read</span>`;
+  if (x.current) return `<span class="pill g">${t("ackd")}</span>`;
+  if (x.previousVersion) return `<span class="pill a">${t("reAck")}</span>`;
+  return `<span class="pill r">${t("mustRead")}</span>`;
 }
 function docsCard(list, self){
   if (!list?.length) return "";
   const open = list.filter((x) => !x.current).length;
   if (self && !open) return "";
-  return `<div class="card"><div class="row" style="justify-content:space-between"><h2 style="margin:0">${self ? "To read" : "Required reading"}</h2>
-      <span class="small muted">${list.length - open} of ${list.length} acknowledged</span></div>
-    <p class="small muted" style="margin:6px 0 10px">${self ? "Open each one, read it, and tap “I have read and understand this” at the bottom." : "Documents this person must read and acknowledge."}</p>
-    <div class="list">${(self ? list.filter((x) => !x.current) : list).map((x) => `<div class="item"><div class="txt"><b>${esc(x.title)}</b><span class="small muted">v${esc(x.version)} · ${esc(x.category)}</span>
+  return `<div class="card"><div class="row" style="justify-content:space-between"><h2 style="margin:0">${self ? t("toRead") : t("requiredReading")}</h2>
+      <span class="small muted">${t("nOfAck", list.length - open, list.length)}</span></div>
+    <p class="small muted" style="margin:6px 0 10px">${self ? t("toReadHelp") : t("reqHelp")}</p>
+    <div class="list">${(self ? list.filter((x) => !x.current) : list).map((x) => `<div class="item"><div class="txt"><b>${esc(x.title)}</b><span class="small muted">v${esc(x.version)} · ${esc(catName(x.category))}</span>
       <div>${ackPill(x)} ${x.current ? `<span class="small muted">${fmtDate(x.acknowledgedAt)}</span>` : ""}</div></div>
-      ${self ? `<button class="btn sm" data-doc="${x.id}">Read</button>` : ""}</div>`).join("")}</div></div>`;
+      ${self ? `<button class="btn sm" data-doc="${x.id}">${t("read")}</button>` : ""}</div>`).join("")}</div></div>`;
 }
 
 async function library(q = ""){
@@ -430,15 +547,15 @@ async function library(q = ""){
     const docs = await api("library", { q });
     const groups = {};
     docs.forEach((d) => (groups[d.category] ??= []).push(d));
-    const body = docs.length ? Object.entries(groups).map(([cat, ds]) => `<div class="cat">${esc(cat)}</div><div class="list">${ds.map((d) => `
+    const body = docs.length ? Object.entries(groups).map(([cat, ds]) => `<div class="cat">${esc(catName(cat))}</div><div class="list">${ds.map((d) => `
         <div class="item" data-doc="${d.id}" style="cursor:pointer"><div class="num">📄</div><div class="txt"><b>${esc(d.title)}</b>
-          <span class="small muted">v${esc(d.version)}${d.effective ? " · effective " + fmtDate(d.effective) : ""}${d.leadsOnly ? " · Leads only" : ""}</span>
+          <span class="small muted">v${esc(d.version)}${d.effective ? " · " + t("effective") + " " + fmtDate(d.effective) : ""}${d.leadsOnly ? " · " + t("leadsOnly") : ""}</span>
           ${d.snippet ? `<div class="snippet">${esc(d.snippet)}</div>` : d.summary ? `<div class="snippet">${esc(d.summary)}</div>` : ""}</div>${ackPill(d)}</div>`).join("")}</div>`).join("")
-      : `<div class="card muted">${q ? "Nothing matches “" + esc(q) + "”." : "No documents yet."}</div>`;
+      : `<div class="card muted">${q.trim() ? esc(t("nothingMatches", q)) : t("noDocs")}</div>`;
     if (q && $("#libres")) { $("#libres").innerHTML = body; bindDocs(); return; }
-    app.innerHTML = `<h1>Library</h1><p class="muted" style="margin-top:-6px">Manuals, guides and procedures. Search finds words inside the documents too.</p>
-      <input type="search" id="lq" placeholder="Search, e.g. bend radius, Red Tag, SCN" value="${esc(q)}"><div id="libres">${body}</div>`;
-    let t; $("#lq").oninput = (e) => { clearTimeout(t); t = setTimeout(() => library(e.target.value.trim() || " "), 350); };
+    app.innerHTML = `<h1>${t("libraryTitle")}</h1><p class="muted" style="margin-top:-6px">${t("libraryHelp")}</p>
+      <input type="search" id="lq" placeholder="${esc(t("libSearch"))}" value="${esc(q)}"><div id="libres">${body}</div>`;
+    let tm; $("#lq").oninput = (e) => { clearTimeout(tm); tm = setTimeout(() => library(e.target.value.trim() || " "), 350); };
     bindDocs();
   } catch (e) { app.innerHTML = ""; showErr(e); }
 }
@@ -449,16 +566,17 @@ async function docView(id, pre){
   try {
     const d = pre || await api("document", { documentId: id });
     const ack = !d.ackRequired ? "" : d.current
-      ? `<div class="ackbar"><span class="pill g">✓ Acknowledged</span><span class="small">You acknowledged version ${esc(d.version)} on ${fmtDT(d.acknowledgedAt)}.</span></div>`
-      : `<div class="ackbar no-print"><label style="display:flex;gap:10px;align-items:center;margin:0;font-weight:600;flex:1;min-width:220px"><input type="checkbox" id="ackck" style="width:26px;height:26px;flex:none">I have read and understand this document (version ${esc(d.version)}).</label>
-          <button class="btn green" id="ackbtn" disabled>Acknowledge</button></div>`;
-    app.innerHTML = `<div class="row no-print" style="margin-bottom:10px"><button class="btn ghost sm" id="back">← Library</button><button class="btn ghost sm" onclick="print()">Print</button>
+      ? `<div class="ackbar"><span class="pill g">✓ ${t("ackd")}</span><span class="small">${esc(t("youAcked", d.version, fmtDT(d.acknowledgedAt)))}</span></div>`
+      : `<div class="ackbar no-print"><label style="display:flex;gap:10px;align-items:center;margin:0;font-weight:600;flex:1;min-width:220px"><input type="checkbox" id="ackck" style="width:26px;height:26px;flex:none">${esc(t("iRead", d.version))}</label>
+          <button class="btn green" id="ackbtn" disabled>${t("ackBtn")}</button></div>`;
+    app.innerHTML = `<div class="row no-print" style="margin-bottom:10px"><button class="btn ghost sm" id="back">${t("backLibrary")}</button><button class="btn ghost sm" onclick="print()">${t("print")}</button>
         ${d.files.map((f) => `<a class="btn ghost sm" href="${esc(f.url)}" target="_blank" rel="noopener">⬇ ${esc(f.filename)}</a>`).join("")}</div>
       <div class="card doc">
-        <div class="small muted">${esc(d.category)}</div><h1 style="margin-bottom:4px">${esc(d.title)}</h1>
-        <div class="row small muted" style="margin-bottom:8px"><span>Version ${esc(d.version)}</span>${d.effective ? `<span>· Effective ${fmtDate(d.effective)}</span>` : ""} ${ackPill(d)}</div>
-        ${d.previousVersion && !d.current ? `<div class="callout">This document was updated since you last acknowledged it (you read v${esc(d.previousVersion)}).${d.revisionNotes ? " What changed: " + esc(d.revisionNotes) : ""}</div>` : ""}
-        ${d.modules?.length ? `<p class="small">Used in training: ${d.modules.map((m) => esc(m.name)).join(", ")}</p>` : ""}
+        <div class="small muted">${esc(catName(d.category))}</div><h1 style="margin-bottom:4px">${esc(d.title)}</h1>
+        <div class="row small muted" style="margin-bottom:8px"><span>${t("version")} ${esc(d.version)}</span>${d.effective ? `<span>· ${t("effectiveCap")} ${fmtDate(d.effective)}</span>` : ""} ${ackPill(d)}</div>
+        ${esNote(d.translated)}
+        ${d.previousVersion && !d.current ? `<div class="callout">${esc(t("updatedSince", d.previousVersion))}${d.revisionNotes ? esc(t("whatChanged")) + esc(d.revisionNotes) : ""}</div>` : ""}
+        ${d.modules?.length ? `<p class="small">${t("usedIn")}${d.modules.map((m) => esc(m.name)).join(", ")}</p>` : ""}
         ${md(d.content)}
         ${ack}
       </div>`;
@@ -467,10 +585,11 @@ async function docView(id, pre){
       $("#ackck").onchange = (e) => $("#ackbtn").disabled = !e.target.checked;
       $("#ackbtn").onclick = async (e) => { e.target.disabled = true; try { docView(id, await api("acknowledge", { documentId: id })); } catch (err) { showErr(err); e.target.disabled = false; } };
     }
-  } catch (e) { app.innerHTML = '<div class="row"><button class="btn ghost sm" id="back">← Library</button></div>'; $("#back").onclick = () => go("library"); showErr(e); }
+  } catch (e) { app.innerHTML = `<div class="row"><button class="btn ghost sm" id="back">${t("backLibrary")}</button></div>`; $("#back").onclick = () => go("library"); showErr(e); }
 }
 
 // ===== Start =====
+setLang(LANG);
 const saved = store.get("session");
 if (saved?.token) { S.token = saved.token; S.me = saved.me; bumpIdle(); go("home"); } else { renderHeader(); renderLogin(); }
 </script>
