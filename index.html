@@ -138,6 +138,7 @@ const I18N = {
     backLibrary: "← Library", print: "Print", youAcked: (v, d) => `You acknowledged version ${v} on ${d}.`, iRead: (v) => `I have read and understand this document (version ${v}).`,
     ackBtn: "Acknowledge", updatedSince: (v) => `This document was updated since you last acknowledged it (you read v${v}).`, whatChanged: " What changed: ",
     usedIn: "Used in training: ", draftEs: "", notTranslated: "",
+    optional: "Optional", optionalHelp: "Optional for you. Take it if you like; it never shows as missing.",
   },
   es: {
     signout: "Salir", switchLang: "English", tabHome: "Mi capacitación", tabLibrary: "Biblioteca", tabTrainees: "Aprendices",
@@ -176,6 +177,7 @@ const I18N = {
     backLibrary: "← Biblioteca", print: "Imprimir", youAcked: (v, d) => `Usted confirmó la versión ${v} (${d})`, iRead: (v) => `He leído y entiendo este documento (versión ${v}).`,
     ackBtn: "Confirmar", updatedSince: (v) => `Este documento cambió desde la última vez que lo confirmó (usted leyó la v${v}).`, whatChanged: " Qué cambió: ",
     usedIn: "Se usa en la capacitación: ",
+    optional: "Opcional", optionalHelp: "Es opcional para usted. Puede tomarlo si quiere; nunca aparece como pendiente.",
     draftEs: "Traducción al español en borrador. Si algo no está claro, pregunte a su supervisor. La versión en inglés es la oficial.",
     notTranslated: "Esta parte todavía no está traducida al español, así que se muestra en inglés.",
   },
@@ -338,7 +340,8 @@ function courseHTML(c, opts){
     return `<div class="item"><div class="num ${p.signed ? "done" : ""}">${p.signed ? "✓" : esc(p.code)}</div><div class="txt"><b>${esc(p.task)}</b><div class="small muted">${esc(p.confirms)}</div><div>${st}</div></div>${action}</div>`;
   }).join("");
   return `<div class="card">
-    <div class="row" style="justify-content:space-between"><h2 style="margin:0">${esc(c.name)}</h2>${statusPill(c.status)}</div>
+    <div class="row" style="justify-content:space-between"><h2 style="margin:0">${esc(c.name)}</h2><span>${c.required === false ? `<span class="pill b" title="${esc(t("optionalHelp"))}">${t("optional")}</span> ` : ""}${statusPill(c.status)}</span></div>
+    ${c.required === false && opts.self ? `<p class="small muted" style="margin:6px 0 0">${t("optionalHelp")}</p>` : ""}
     ${c.status === "Qualified" ? `<p class="small" style="color:var(--green);font-weight:600">${t("qualifiedOn", fmtDate(c.qualifiedDate), c.expires ? fmtDate(c.expires) : "")}</p>` : ""}
     <div class="row small muted" style="margin:10px 0 6px"><span>${t("nOfComplete", done, total)}</span></div>
     <div class="bar"><i style="width:${total ? done / total * 100 : 0}%"></i></div>
@@ -353,7 +356,7 @@ async function home(){
     const d = await api("home"); S.data = d;
     app.innerHTML = `<h1>${esc(t("hi", d.employee.name.split(" ")[0]))}</h1>
       ${docsCard(d.documents, true)}
-      ${d.courses.length ? d.courses.map((c) => courseHTML(c, { self: true })).join("") : `<div class="card">${t("noTraining")}</div>`}
+      ${d.courses.length ? [...d.courses].sort((a, b) => Number(b.required !== false) - Number(a.required !== false)).map((c) => courseHTML(c, { self: true })).join("") : `<div class="card">${t("noTraining")}</div>`}
       <div class="row no-print"><button class="btn ghost" id="tr">${t("myRecord")}</button></div>`;
     app.querySelectorAll("[data-lesson]").forEach((b) => b.onclick = () => go("lesson", b.dataset.lesson));
     app.querySelectorAll("[data-doc]").forEach((b) => b.onclick = () => go("doc", b.dataset.doc));
@@ -433,23 +436,34 @@ async function submitQuiz(){
 }
 
 // ===== QC Lead =====
-async function trainees(){
+async function trainees(note){
   if (!isLead()) return go("home");
   loading();
   try {
     const d = await api("trainees");
     const draw = (filter = "") => {
       const f = filter.toLowerCase();
-      const ppl = d.people.filter((p) => !f || p.name.toLowerCase().includes(f) || String(p.employeeId).includes(f) || (p.site || "").toLowerCase().includes(f));
+      const ppl = d.people.filter((p) => !f || p.name.toLowerCase().includes(f) || String(p.employeeId).includes(f) || (p.site || "").toLowerCase().includes(f) || (p.classification || "").toLowerCase().includes(f) || (p.subCompany || "").toLowerCase().includes(f));
       $("#plist").innerHTML = ppl.map((p) => `<div class="item" data-p="${p.id}" style="cursor:pointer">
-        <div class="txt"><b>${esc(p.name)}</b><span class="small muted">#${esc(p.employeeId)}${p.site ? " · " + esc(p.site) : ""} · ${esc(p.role)}</span></div>
-        <div class="small" style="text-align:right">Quizzes ${p.modulesPassed}/${d.totalModules}<br>Sign-offs ${p.practicalSigned}/${d.totalPractical}</div>
-        ${p.locked ? '<span class="pill r">Needs review</span>' : p.modulesPassed === d.totalModules && p.practicalSigned === d.totalPractical && d.totalModules ? '<span class="pill g">Complete</span>' : ""}
+        <div class="txt"><b>${esc(p.name)}</b><span class="small muted">#${esc(p.employeeId)}${p.classification ? " · " + esc(p.classification) : ""}${p.site ? " · " + esc(p.site) : ""} · ${esc(p.role)}${p.sub ? " · SUB" + (p.subCompany ? " (" + esc(p.subCompany) + ")" : "") : ""}</span></div>
+        <div class="small" style="text-align:right">Quizzes ${p.modulesPassed}/${p.totalModules ?? d.totalModules}<br>Sign-offs ${p.practicalSigned}/${p.totalPractical ?? d.totalPractical}</div>
+        ${p.locked ? '<span class="pill r">Needs review</span>' : (p.totalModules ?? d.totalModules) && p.modulesPassed === (p.totalModules ?? d.totalModules) && p.practicalSigned === (p.totalPractical ?? d.totalPractical) ? '<span class="pill g">Complete</span>' : ""}
       </div>`).join("") || '<div class="item muted">No one matches.</div>';
       app.querySelectorAll("[data-p]").forEach((el) => el.onclick = () => go("trainee", el.dataset.p));
     };
-    app.innerHTML = `<h1>${t("tabTrainees")}</h1><input type="search" id="q" placeholder="Search name, ID or site"><div class="list" id="plist" style="margin-top:12px"></div>`;
+    app.innerHTML = `<div class="row" style="justify-content:space-between"><h1>${t("tabTrainees")}</h1>${S.me.role === "Admin" ? '<button class="btn ghost sm" id="sync">Sync from time clock</button>' : ""}</div>
+      <div id="syncres">${note || ""}</div>
+      <input type="search" id="q" placeholder="Search name, ID, classification, site or sub company"><div class="list" id="plist" style="margin-top:12px"></div>`;
     $("#q").oninput = (e) => draw(e.target.value); draw();
+    if ($("#sync")) $("#sync").onclick = async (e) => {
+      e.target.disabled = true; e.target.textContent = "Syncing…";
+      try {
+        const r = await api("sync");
+        const warn = [r.noEmployeeNumber?.length ? `${r.noEmployeeNumber.length} skipped with no employee # (${r.noEmployeeNumber.slice(0, 5).map(esc).join(", ")}${r.noEmployeeNumber.length > 5 ? "…" : ""})` : "",
+          r.duplicateNumbers?.length ? `duplicate employee #: ${r.duplicateNumbers.map(esc).join(", ")}` : ""].filter(Boolean).join("; ");
+        trainees(`<div class="callout">Synced ${r.inTimeClock} people from the time clock: ${r.created} added, ${r.updated} updated, ${r.deactivated} set inactive.${warn ? "<br>" + warn : ""}</div>`);
+      } catch (err) { showErr(err); e.target.disabled = false; e.target.textContent = "Sync from time clock"; }
+    };
   } catch (e) { app.innerHTML = ""; showErr(e); }
 }
 
